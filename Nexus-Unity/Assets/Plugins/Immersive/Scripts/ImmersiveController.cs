@@ -96,6 +96,10 @@ public sealed class ImmersiveController : MonoBehaviour
 
     private void OnDisable()
     {
+#if UNITY_EDITOR
+        EditorApplication.delayCall -= DelayedProcessPendingChanges;
+#endif
+
         if (!Application.isPlaying)
         {
             ReleaseAllResources();
@@ -104,6 +108,10 @@ public sealed class ImmersiveController : MonoBehaviour
 
     private void OnDestroy()
     {
+#if UNITY_EDITOR
+        EditorApplication.delayCall -= DelayedProcessPendingChanges;
+#endif
+
         ReleaseAllResources();
     }
 
@@ -126,10 +134,22 @@ public sealed class ImmersiveController : MonoBehaviour
         _requiresSync = true;
 
 #if UNITY_EDITOR
-        EditorApplication.delayCall -= ProcessPendingChanges;
-        EditorApplication.delayCall += ProcessPendingChanges;
+        EditorApplication.delayCall -= DelayedProcessPendingChanges;
+        EditorApplication.delayCall += DelayedProcessPendingChanges;
 #endif
     }
+
+#if UNITY_EDITOR
+    private void DelayedProcessPendingChanges()
+    {
+        if (!this)
+        {
+            return;
+        }
+
+        ProcessPendingChanges();
+    }
+#endif
 
     private void Update()
     {
@@ -139,6 +159,11 @@ public sealed class ImmersiveController : MonoBehaviour
 
     private void ProcessPendingChanges()
     {
+        if (!this)
+        {
+            return;
+        }
+
         if (!isActiveAndEnabled)
         {
             return;

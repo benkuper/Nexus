@@ -12,8 +12,8 @@ public class TileController : MonoBehaviour
     [Min(0f)] public float totalHeight = 10f;
 
     [Header("Grid Count")]
-    [Min(0)] [SerializeField] private int horizontalCount = 5;
-    [Min(0)] [SerializeField] private int verticalCount = 5;
+    [Min(0)][SerializeField] private int horizontalCount = 5;
+    [Min(0)][SerializeField] private int verticalCount = 5;
 
     [Header("Layout")]
     [SerializeField] private Vector2 spread = new Vector2(0.1f, 0.1f);
@@ -22,14 +22,14 @@ public class TileController : MonoBehaviour
     [Header("Tile")]
     [SerializeField] private GameObject tilePrefab;
     [SerializeField] private Vector3 tileScale = Vector3.one;
-    [Min(0f)] [SerializeField] private float tileDepth = 0.1f;
+    [Min(0f)][SerializeField] private float tileDepth = 0.1f;
     [SerializeField] private string tileName = "Tile";
 
     [Header("Live Update")]
     [SerializeField] private bool autoRefresh = true;
 
     [SerializeField, HideInInspector] private Transform tilesContainer;
-    [SerializeField, HideInInspector] private List<Transform> generatedTiles = new List<Transform>();
+    [SerializeField, HideInInspector] private List<Tile> generatedTiles = new List<Tile>();
     [SerializeField, HideInInspector] private int cachedTileCount = -1;
     [SerializeField, HideInInspector] private GameObject cachedPrefab;
 
@@ -62,6 +62,11 @@ public class TileController : MonoBehaviour
         {
             LayoutTiles();
         }
+    }
+
+    void Update()
+    {
+        LayoutTiles();
     }
 
     [ContextMenu("Refresh Tiles")]
@@ -127,7 +132,7 @@ public class TileController : MonoBehaviour
     {
         if (generatedTiles == null)
         {
-            generatedTiles = new List<Transform>();
+            generatedTiles = new List<Tile>();
         }
 
         generatedTiles.RemoveAll(tile => tile == null);
@@ -141,9 +146,9 @@ public class TileController : MonoBehaviour
         {
             Transform child = tilesContainer.GetChild(childIndex);
 
-            if (child.TryGetComponent(out TileGeneratedMarker _) && !generatedTiles.Contains(child))
+            if (child.TryGetComponent(out Tile tile) && !generatedTiles.Contains(tile))
             {
-                generatedTiles.Add(child);
+                generatedTiles.Add(tile);
             }
         }
     }
@@ -160,13 +165,13 @@ public class TileController : MonoBehaviour
         while (generatedTiles.Count > targetCount)
         {
             int lastIndex = generatedTiles.Count - 1;
-            Transform tile = generatedTiles[lastIndex];
+            Tile tile = generatedTiles[lastIndex];
             generatedTiles.RemoveAt(lastIndex);
             DestroyTile(tile);
         }
     }
 
-    private Transform CreateTile(int index)
+    private Tile CreateTile(int index)
     {
         Transform container = GetOrCreateContainer();
         GameObject tileObject;
@@ -178,25 +183,25 @@ public class TileController : MonoBehaviour
         }
         else
 #endif
-        if (tilePrefab != null)
-        {
-            tileObject = Instantiate(tilePrefab, container);
-        }
-        else
-        {
-            tileObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            tileObject.transform.SetParent(container, false);
-        }
+            if (tilePrefab != null)
+            {
+                tileObject = Instantiate(tilePrefab, container);
+            }
+            else
+            {
+                tileObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                tileObject.transform.SetParent(container, false);
+            }
 
         tileObject.name = $"{tileName} {index + 1}";
         tileObject.transform.localRotation = Quaternion.identity;
 
-        if (!tileObject.TryGetComponent(out TileGeneratedMarker _))
+        if (!tileObject.TryGetComponent(out Tile _))
         {
-            tileObject.AddComponent<TileGeneratedMarker>();
+            tileObject.AddComponent<Tile>();
         }
 
-        return tileObject.transform;
+        return tileObject.GetComponent<Tile>();
     }
 
     private void LayoutTiles()
@@ -219,13 +224,33 @@ public class TileController : MonoBehaviour
         {
             for (int x = 0; x < horizontalCount; x++)
             {
-                Transform tile = generatedTiles[tileIndex];
+                Tile tile = generatedTiles[tileIndex];
+                if(tile == null) continue;
+                tile.x = x;
+                tile.y = y;
+                tile.relativeX = horizontalCount > 1 ? (float)x / (horizontalCount - 1) : 0f;
+                tile.relativeY = verticalCount > 1 ? (float)y / (verticalCount - 1) : 0f;
                 tile.name = $"{tileName} {tileIndex + 1}";
-                tile.localPosition = new Vector3(startX + (x * strideX), startY + (y * strideY), 0f);
-                tile.localRotation = Quaternion.identity;
-                tile.localScale = resolvedTileScale;
+                tile.transform.localPosition = new Vector3(startX + (x * strideX), startY + (y * strideY), 0f);
+                tile.transform.localRotation = Quaternion.identity;
+                tile.transform.localScale = resolvedTileScale;
                 tileIndex++;
+
             }
+        }
+
+        ApplyModifiers();
+
+    }
+
+    void ApplyModifiers()
+    {
+        TileModifier[] modifiers = GetComponents<TileModifier>();
+
+        foreach (TileModifier modifier in modifiers)
+        {
+            if(!modifier.enabled) continue;
+            modifier.updateTiles();
         }
     }
 
@@ -240,7 +265,7 @@ public class TileController : MonoBehaviour
         return Mathf.Max(0f, (totalSize - totalSpacing) / count);
     }
 
-    private void DestroyTile(Transform tile)
+    private void DestroyTile(Tile tile)
     {
         if (tile == null)
         {
@@ -255,9 +280,4 @@ public class TileController : MonoBehaviour
 
         DestroyImmediate(tile.gameObject);
     }
-}
-
-[DisallowMultipleComponent]
-internal sealed class TileGeneratedMarker : MonoBehaviour
-{
 }
