@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
@@ -144,6 +145,7 @@ public sealed class ImmersiveController : MonoBehaviour
         }
 
         EnsureContainers();
+        CleanupDuplicateGeneratedChildren();
 
         if (_requiresSync)
         {
@@ -196,7 +198,7 @@ public sealed class ImmersiveController : MonoBehaviour
         {
             if (rig == null)
             {
-                rig = CreateRig(id);
+                rig = TryRebindExistingRig(id) ?? CreateRig(id);
                 _rigs[id] = rig;
             }
             return;
@@ -206,6 +208,135 @@ public sealed class ImmersiveController : MonoBehaviour
         {
             DestroyRig(rig);
             _rigs.Remove(id);
+        }
+        else
+        {
+            DestroyExistingRigObjects(id);
+        }
+    }
+
+    private SurfaceRig TryRebindExistingRig(SurfaceId id)
+    {
+        if (_wallsContainer == null || _camerasContainer == null)
+        {
+            return null;
+        }
+
+        var wall = FindFirstChildByExactName(_wallsContainer, id + "_Wall");
+        var cameraTransform = FindFirstChildByExactName(_camerasContainer, id + "_Camera");
+
+        if (wall == null || cameraTransform == null)
+        {
+            return null;
+        }
+
+        var camera = cameraTransform.GetComponent<Camera>();
+        if (camera == null)
+        {
+            camera = cameraTransform.gameObject.AddComponent<Camera>();
+        }
+
+        var renderer = wall.GetComponent<MeshRenderer>();
+        if (renderer == null)
+        {
+            return null;
+        }
+
+        var rig = new SurfaceRig
+        {
+            id = id,
+            wall = wall.gameObject,
+            renderer = renderer,
+            camera = camera,
+            renderTexture = camera.targetTexture as RenderTexture
+        };
+
+        rig.runtimeMaterial = renderer.sharedMaterial;
+        return rig;
+    }
+
+    private void DestroyExistingRigObjects(SurfaceId id)
+    {
+        DestroyAllChildrenByExactName(_wallsContainer, id + "_Wall");
+        DestroyAllChildrenByExactName(_camerasContainer, id + "_Camera");
+    }
+
+    private void CleanupDuplicateGeneratedChildren()
+    {
+        CleanupDuplicatesForSurface(SurfaceId.Front);
+        CleanupDuplicatesForSurface(SurfaceId.Back);
+        CleanupDuplicatesForSurface(SurfaceId.Left);
+        CleanupDuplicatesForSurface(SurfaceId.Right);
+        CleanupDuplicatesForSurface(SurfaceId.Floor);
+        CleanupDuplicatesForSurface(SurfaceId.Ceiling);
+    }
+
+    private void CleanupDuplicatesForSurface(SurfaceId id)
+    {
+        KeepOnlyFirstChildByExactName(_wallsContainer, id + "_Wall");
+        KeepOnlyFirstChildByExactName(_camerasContainer, id + "_Camera");
+    }
+
+    private static Transform FindFirstChildByExactName(Transform parent, string name)
+    {
+        if (parent == null)
+        {
+            return null;
+        }
+
+        for (var i = 0; i < parent.childCount; i++)
+        {
+            var child = parent.GetChild(i);
+            if (string.Equals(child.name, name, StringComparison.Ordinal))
+            {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    private static void KeepOnlyFirstChildByExactName(Transform parent, string name)
+    {
+        if (parent == null)
+        {
+            return;
+        }
+
+        Transform first = null;
+
+        for (var i = parent.childCount - 1; i >= 0; i--)
+        {
+            var child = parent.GetChild(i);
+            if (!string.Equals(child.name, name, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (first == null)
+            {
+                first = child;
+                continue;
+            }
+
+            SafeDestroy(child.gameObject);
+        }
+    }
+
+    private static void DestroyAllChildrenByExactName(Transform parent, string name)
+    {
+        if (parent == null)
+        {
+            return;
+        }
+
+        for (var i = parent.childCount - 1; i >= 0; i--)
+        {
+            var child = parent.GetChild(i);
+            if (string.Equals(child.name, name, StringComparison.Ordinal))
+            {
+                SafeDestroy(child.gameObject);
+            }
         }
     }
 
@@ -267,7 +398,7 @@ public sealed class ImmersiveController : MonoBehaviour
             UpdateRenderTexture(rig);
             UpdateWallMaterial(rig);
             UpdateCameraProjection(rig, eye);
-            UpdateSenderState(rig.camera.gameObject);
+            UpdateSenderState(rig);
         }
     }
 
@@ -383,7 +514,7 @@ public sealed class ImmersiveController : MonoBehaviour
         {
             rig.renderTexture = new RenderTexture(size.x, size.y, depthBufferBits, renderTextureFormat)
             {
-                name = rig.id + "_RT",
+                name = rig.id.ToString(),
                 antiAliasing = 1,
                 autoGenerateMips = false,
                 useMipMap = false
@@ -391,6 +522,7 @@ public sealed class ImmersiveController : MonoBehaviour
             rig.renderTexture.Create();
         }
 
+        rig.renderTexture.name = rig.id.ToString();
         rig.camera.targetTexture = rig.renderTexture;
     }
 
@@ -400,7 +532,22 @@ public sealed class ImmersiveController : MonoBehaviour
         var width = Mathf.Max(16, Mathf.RoundToInt(wallWidth * pixelsPerMeter));
         var height = Mathf.Max(16, Mathf.RoundToInt(wallHeight * pixelsPerMeter));
 
+        // NDI requires dimensions aligned to 16-pixel blocks.
+        width = AlignUpToMultiple(width, 16);
+        height = AlignUpToMultiple(height, 16);
+
         return new Vector2Int(width, height);
+    }
+
+    private static int AlignUpToMultiple(int value, int multiple)
+    {
+        if (multiple <= 1)
+        {
+            return value;
+        }
+
+        var remainder = value % multiple;
+        return remainder == 0 ? value : value + (multiple - remainder);
     }
 
     private float GetPixelsPerMeter()
@@ -588,11 +735,19 @@ public sealed class ImmersiveController : MonoBehaviour
         return m;
     }
 
-    private void UpdateSenderState(GameObject cameraObject)
+    private void UpdateSenderState(SurfaceRig rig)
     {
+        if (rig.camera == null)
+        {
+            return;
+        }
+
+        var cameraObject = rig.camera.gameObject;
+        var streamName = rig.id.ToString();
         var spoutAllowed = enableSpoutSender && IsSpoutAllowedOnCurrentGraphicsApi();
-        ToggleComponentByTypeName(cameraObject, "SpoutSender", spoutAllowed);
-        ToggleComponentByTypeName(cameraObject, "NdiSender", enableNdiSender);
+
+        ConfigureSenderComponent(cameraObject, new[] { "SpoutSender" }, spoutAllowed, streamName, rig.camera, rig.renderTexture, true);
+        ConfigureSenderComponent(cameraObject, new[] { "NDISender", "NdiSender" }, enableNdiSender, streamName, rig.camera, rig.renderTexture, true);
     }
 
     private static bool IsSpoutAllowedOnCurrentGraphicsApi()
@@ -601,7 +756,14 @@ public sealed class ImmersiveController : MonoBehaviour
         return SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
     }
 
-    private static void ToggleComponentByTypeName(GameObject go, string typeNameSuffix, bool enabled)
+    private static void ConfigureSenderComponent(
+        GameObject go,
+        string[] typeNames,
+        bool enabled,
+        string streamName,
+        Camera sourceCamera,
+        RenderTexture sourceTexture,
+        bool forceTextureCapture)
     {
         var behaviours = go.GetComponents<MonoBehaviour>();
         for (var i = 0; i < behaviours.Length; i++)
@@ -612,11 +774,132 @@ public sealed class ImmersiveController : MonoBehaviour
                 continue;
             }
 
-            if (behaviour.GetType().Name.EndsWith(typeNameSuffix, StringComparison.Ordinal))
+            if (!MatchesTypeName(behaviour.GetType(), typeNames))
             {
-                behaviour.enabled = enabled;
+                continue;
+            }
+
+            behaviour.enabled = enabled;
+            SetSenderName(behaviour, streamName);
+            SetCameraMember(behaviour, "sourceCamera", sourceCamera);
+            SetTextureMember(behaviour, "sourceTexture", sourceTexture);
+
+            if (forceTextureCapture)
+            {
+                SetEnumMemberByName(behaviour, "captureMethod", "Texture");
             }
         }
+    }
+
+    private static bool MatchesTypeName(Type type, string[] typeNames)
+    {
+        for (var i = 0; i < typeNames.Length; i++)
+        {
+            if (string.Equals(type.Name, typeNames[i], StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void SetSenderName(MonoBehaviour behaviour, string value)
+    {
+        SetStringMember(behaviour, "spoutName", value);
+        SetStringMember(behaviour, "ndiName", value);
+        SetStringMember(behaviour, "senderName", value);
+        SetStringMember(behaviour, "streamName", value);
+    }
+
+    private static void SetStringMember(object target, string memberName, string value)
+    {
+        var type = target.GetType();
+        var property = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property != null && property.CanWrite && property.PropertyType == typeof(string))
+        {
+            property.SetValue(target, value);
+            return;
+        }
+
+        var field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && field.FieldType == typeof(string))
+        {
+            field.SetValue(target, value);
+        }
+    }
+
+    private static void SetTextureMember(object target, string memberName, Texture value)
+    {
+        var type = target.GetType();
+        var property = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property != null && property.CanWrite && typeof(Texture).IsAssignableFrom(property.PropertyType))
+        {
+            property.SetValue(target, value);
+            return;
+        }
+
+        var field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && typeof(Texture).IsAssignableFrom(field.FieldType))
+        {
+            field.SetValue(target, value);
+        }
+    }
+
+    private static void SetCameraMember(object target, string memberName, Camera value)
+    {
+        var type = target.GetType();
+        var property = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property != null && property.CanWrite && typeof(Camera).IsAssignableFrom(property.PropertyType))
+        {
+            property.SetValue(target, value);
+            return;
+        }
+
+        var field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && typeof(Camera).IsAssignableFrom(field.FieldType))
+        {
+            field.SetValue(target, value);
+        }
+    }
+
+    private static void SetEnumMemberByName(object target, string memberName, string enumValueName)
+    {
+        var type = target.GetType();
+        var property = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property != null && property.CanWrite && property.PropertyType.IsEnum)
+        {
+            var enumValue = FindEnumValue(property.PropertyType, enumValueName);
+            if (enumValue != null)
+            {
+                property.SetValue(target, enumValue);
+            }
+            return;
+        }
+
+        var field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && field.FieldType.IsEnum)
+        {
+            var enumValue = FindEnumValue(field.FieldType, enumValueName);
+            if (enumValue != null)
+            {
+                field.SetValue(target, enumValue);
+            }
+        }
+    }
+
+    private static object FindEnumValue(Type enumType, string enumValueName)
+    {
+        var names = Enum.GetNames(enumType);
+        for (var i = 0; i < names.Length; i++)
+        {
+            if (string.Equals(names[i], enumValueName, StringComparison.OrdinalIgnoreCase))
+            {
+                return Enum.Parse(enumType, names[i]);
+            }
+        }
+
+        return null;
     }
 
     private void DestroyRig(SurfaceRig rig)

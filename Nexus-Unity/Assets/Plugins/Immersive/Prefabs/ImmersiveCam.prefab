@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3220311702645164957}
   - component: {fileID: 3892090991392700117}
-  - component: {fileID: 408834698184898038}
   - component: {fileID: 4676326434835555274}
   - component: {fileID: 4733765380892338427}
   - component: {fileID: 9025931809566933398}
@@ -87,14 +86,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &408834698184898038
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7526642767665529620}
-  m_Enabled: 1
 --- !u!114 &4676326434835555274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,8 +238,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Klak.Spout.Runtime::Klak.Spout.SpoutSender
   _spoutName: Spout Sender
-  _keepAlpha: 0
-  _captureMethod: 0
+  _keepAlpha: 1
+  _captureMethod: 2
   _sourceCamera: {fileID: 0}
   _sourceTexture: {fileID: 0}
   _resources: {fileID: 11400000, guid: f449ebbe2051c2e4d993eaa773a410de, type: 2}
@@ -265,8 +256,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Klak.Ndi.Runtime::Klak.Ndi.NdiSender
   _ndiName: NDI Sender
-  _keepAlpha: 0
-  _captureMethod: 0
+  _keepAlpha: 1
+  _captureMethod: 1
   _sourceCamera: {fileID: 0}
   _sourceTexture: {fileID: 0}
   _resources: {fileID: 11400000, guid: 69304b86950074db7ba8caba75214004, type: 2}
