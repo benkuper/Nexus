@@ -8,7 +8,7 @@ public class TileFlipperModifier : TileModifier
     public float progressionFade = 0.5f; // Controls how wide the sweep affects neighboring tiles
     [Range(0f, 1f)]
     public float flipRandomness = 0.5f; // Controls how different tiles are from each other (1 = max variation between tiles)
-    
+
     public float flipAmount = 180;
 
     public bool verticalProgression;
@@ -19,10 +19,12 @@ public class TileFlipperModifier : TileModifier
 
     public Color color1 = Color.white;
     public Color color2 = Color.red;
+    public Texture2D texture1 = null;
+    public Texture2D texture2 = null;
 
     public override void updateTile(Tile tile, float weight)
     {
-        float eProg = Mathf.Lerp(-progressionFade-flipRandomness, 1+progressionFade+flipRandomness, progression);
+        float eProg = Mathf.Lerp(-progressionFade - flipRandomness, 1 + progressionFade + flipRandomness, progression);
         float tileProg = verticalProgression ? tile.relativeY : tile.relativeX;
         float randomOffset = Mathf.PerlinNoise(tile.x * 13.7f, tile.y * 17.3f) * flipRandomness;
         tileProg += randomOffset;
@@ -32,8 +34,9 @@ public class TileFlipperModifier : TileModifier
         }
 
         float progDiff = tileProg - eProg;
-        float flipProg = Mathf.Clamp01(1f - progDiff / progressionFade);
-        if (reverseFlip)        {
+        float flipProg = Mathf.Clamp01(1f - progDiff / Mathf.Max(progressionFade, 0.0001f));
+        if (reverseFlip)
+        {
             flipProg = 1f - flipProg;
         }
 
@@ -49,5 +52,6 @@ public class TileFlipperModifier : TileModifier
 
         Color tileColor = Color.Lerp(color1, color2, flipProg * weight);
         tile.GetComponent<Renderer>().material.color = tileColor;
+        tile.GetComponent<Renderer>().material.SetTexture("_BaseColorMap", flipProg * weight < 0.5f ? texture1 : texture2);
     }
 }

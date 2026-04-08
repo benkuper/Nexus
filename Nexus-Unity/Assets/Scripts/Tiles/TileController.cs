@@ -234,6 +234,15 @@ public class TileController : MonoBehaviour
                 tile.transform.localPosition = new Vector3(startX + (x * strideX), startY + (y * strideY), 0f);
                 tile.transform.localRotation = Quaternion.identity;
                 tile.transform.localScale = resolvedTileScale;
+
+                // set material uv tiling and offset based on grid size
+                Renderer renderer = tile.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    renderer.sharedMaterial.mainTextureScale = new Vector2(-1f / horizontalCount, -1f / verticalCount);
+                    renderer.sharedMaterial.mainTextureOffset = new Vector2((float)x / horizontalCount, (float)y / verticalCount);  
+                }
+
                 tileIndex++;
 
             }
