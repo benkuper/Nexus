@@ -7,8 +7,8 @@ public class TileSphereInfluencer : TileModifierInfluencer
     {
         Vector3 localPos = transform.InverseTransformPoint(pos);
         
-
-        float curveValue = animationCurve.Evaluate(localPos.magnitude);
+        float noiseXY = randomness > 0f ? Mathf.PerlinNoise(localPos.magnitude * randomScale, localPos.magnitude* 1.37f * randomScale) : 0f;
+        float curveValue = animationCurve.Evaluate(localPos.magnitude * 2 + Mathf.Lerp(0f, noiseXY, randomness));
         return weight * curveValue;
     }
 

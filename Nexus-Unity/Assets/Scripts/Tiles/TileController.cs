@@ -7,6 +7,14 @@ using UnityEditor;
 [ExecuteAlways]
 public class TileController : MonoBehaviour
 {
+    private static readonly int BaseColorPropertyId = Shader.PropertyToID("_Base_Color");
+    private static readonly int MainTexStPropertyId = Shader.PropertyToID("_MainTex_ST");
+
+    private static readonly int BorderWidthPropertyId = Shader.PropertyToID("_Border_Width");
+    private static readonly int BorderColorPropertyId = Shader.PropertyToID("_Border_Color");
+    private static readonly int BorderIntensityPropertyId = Shader.PropertyToID("_Border_Intensity");
+
+
     [Header("Grid Bounds")]
     [Min(0f)] public float totalWidth = 10f;
     [Min(0f)] public float totalHeight = 10f;
@@ -16,7 +24,8 @@ public class TileController : MonoBehaviour
     [Min(0)][SerializeField] private int verticalCount = 5;
 
     [Header("Layout")]
-    [SerializeField] private Vector2 spread = new Vector2(0.1f, 0.1f);
+    [Range(0f, 1f)]
+    [SerializeField] private float spread = 0f;
     [SerializeField] private bool centerGrid = true;
 
     [Header("Tile")]
@@ -24,6 +33,13 @@ public class TileController : MonoBehaviour
     [SerializeField] private Vector3 tileScale = Vector3.one;
     [Min(0f)][SerializeField] private float tileDepth = 0.1f;
     [SerializeField] private string tileName = "Tile";
+
+    [Header("Material Settings")]
+    [SerializeField] private Color baseColor = Color.black;
+    [SerializeField] private Color borderColor = Color.black;
+    [Range(0f, 0.99f)][SerializeField] private float borderWidth = 0f;
+    [Range(0f,100f)] [SerializeField] private float borderIntensity = 1f;
+    
 
     [Header("Live Update")]
     [SerializeField] private bool autoRefresh = true;
@@ -33,8 +49,15 @@ public class TileController : MonoBehaviour
     [SerializeField, HideInInspector] private int cachedTileCount = -1;
     [SerializeField, HideInInspector] private GameObject cachedPrefab;
 
+    private MaterialPropertyBlock materialBlock;
+
     private void OnEnable()
     {
+        if (materialBlock == null)
+        {
+            materialBlock = new MaterialPropertyBlock();
+        }
+
         if (autoRefresh)
         {
             RefreshTiles();
@@ -120,9 +143,9 @@ public class TileController : MonoBehaviour
     {
         horizontalCount = Mathf.Max(0, horizontalCount);
         verticalCount = Mathf.Max(0, verticalCount);
-        spread.x = Mathf.Max(0f, spread.x);
-        spread.y = Mathf.Max(0f, spread.y);
+        spread = Mathf.Max(0f, spread);
         tileDepth = Mathf.Max(0f, tileDepth);
+        borderWidth = Mathf.Clamp01(borderWidth);
         tileScale.x = Mathf.Max(0f, tileScale.x);
         tileScale.y = Mathf.Max(0f, tileScale.y);
         tileScale.z = Mathf.Max(0f, tileScale.z);
@@ -211,13 +234,17 @@ public class TileController : MonoBehaviour
             return;
         }
 
-        float tileWidth = GetTileSize(totalWidth, horizontalCount, spread.x);
-        float tileHeight = GetTileSize(totalHeight, verticalCount, spread.y);
-        float strideX = tileWidth + spread.x;
-        float strideY = tileHeight + spread.y;
+        float tileWidth = GetTileSize(totalWidth, horizontalCount, spread);
+        float tileHeight = GetTileSize(totalHeight, verticalCount, spread);
+        float strideX = tileWidth + spread;
+        float strideY = tileHeight + spread;
         float startX = centerGrid ? -((horizontalCount - 1) * strideX) * 0.5f : tileWidth * 0.5f;
         float startY = centerGrid ? -((verticalCount - 1) * strideY) * 0.5f : tileHeight * 0.5f;
-        Vector3 resolvedTileScale = new Vector3(tileWidth * tileScale.x, tileHeight * tileScale.y, tileDepth * tileScale.z);
+        Vector3 resolvedTileScale = new Vector3(
+            tileWidth,
+            tileHeight,
+            tileDepth
+        );
         int tileIndex = 0;
 
         for (int y = 0; y < verticalCount; y++)
@@ -225,7 +252,7 @@ public class TileController : MonoBehaviour
             for (int x = 0; x < horizontalCount; x++)
             {
                 Tile tile = generatedTiles[tileIndex];
-                if(tile == null) continue;
+                if (tile == null) continue;
                 tile.x = x;
                 tile.y = y;
                 tile.relativeX = horizontalCount > 1 ? (float)x / (horizontalCount - 1) : 0f;
@@ -236,11 +263,10 @@ public class TileController : MonoBehaviour
                 tile.transform.localScale = resolvedTileScale;
 
                 // set material uv tiling and offset based on grid size
-                Renderer renderer = tile.GetComponent<Renderer>();
+                Renderer renderer = tile.GetComponentInChildren<Renderer>();
                 if (renderer != null)
                 {
-                    renderer.sharedMaterial.mainTextureScale = new Vector2(-1f / horizontalCount, -1f / verticalCount);
-                    renderer.sharedMaterial.mainTextureOffset = new Vector2((float)x / horizontalCount, (float)y / verticalCount);  
+                    ApplyTileMaterial(renderer, x, y);
                 }
 
                 tileIndex++;
@@ -252,13 +278,64 @@ public class TileController : MonoBehaviour
 
     }
 
+    private void ApplyTileMaterial(Renderer renderer, int x, int y)
+    {
+        if (materialBlock == null)
+        {
+            materialBlock = new MaterialPropertyBlock();
+        }
+
+        Material sharedMaterial = renderer.sharedMaterial;
+
+        if (sharedMaterial == null)
+        {
+            return;
+        }
+
+        renderer.GetPropertyBlock(materialBlock);
+
+        Vector4 textureSt = new Vector4(
+            -1f / Mathf.Max(1, horizontalCount),
+            -1f / Mathf.Max(1, verticalCount),
+            (float)x / Mathf.Max(1, horizontalCount),
+            (float)y / Mathf.Max(1, verticalCount)
+        );
+
+        if (sharedMaterial.HasProperty(MainTexStPropertyId))
+        {
+            materialBlock.SetVector(MainTexStPropertyId, textureSt);
+        }
+
+        if (sharedMaterial.HasProperty(BaseColorPropertyId))
+        {
+            materialBlock.SetColor(BaseColorPropertyId, baseColor);
+        }
+        
+        if (sharedMaterial.HasProperty(BorderColorPropertyId))
+        {
+            materialBlock.SetColor(BorderColorPropertyId, borderColor);
+        }
+        
+        if (sharedMaterial.HasProperty(BorderIntensityPropertyId))
+        {
+            materialBlock.SetFloat(BorderIntensityPropertyId, borderIntensity);
+        }
+        
+        if(sharedMaterial.HasProperty(BorderWidthPropertyId))
+        {
+            materialBlock.SetFloat(BorderWidthPropertyId, borderWidth);
+        }
+
+        renderer.SetPropertyBlock(materialBlock);
+    }
+
     void ApplyModifiers()
     {
         TileModifier[] modifiers = GetComponents<TileModifier>();
 
         foreach (TileModifier modifier in modifiers)
         {
-            if(!modifier.enabled) continue;
+            if (!modifier.enabled) continue;
             modifier.updateTiles();
         }
     }
