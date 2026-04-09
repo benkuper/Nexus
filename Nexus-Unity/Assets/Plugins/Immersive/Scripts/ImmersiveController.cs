@@ -67,6 +67,7 @@ public sealed class ImmersiveController : MonoBehaviour
 
     [Header("Resolution Settings")]
     [SerializeField] private ResolutionMode resolutionMode = ResolutionMode.Height;
+    [Min(16)] [SerializeField] private int desiredResolutionValue = 1080;
     [Min(16)] [SerializeField] private int resolutionHeight = 1080;
     [Min(16)] [SerializeField] private int resolutionWidth = 1920;
     [Min(16)] [SerializeField] private int resolutionDepth = 1080;
@@ -120,6 +121,7 @@ public sealed class ImmersiveController : MonoBehaviour
         roomWidth = Mathf.Max(0.01f, roomWidth);
         roomHeight = Mathf.Max(0.01f, roomHeight);
         roomDepth = Mathf.Max(0.01f, roomDepth);
+        desiredResolutionValue = Mathf.Max(16, desiredResolutionValue);
         resolutionHeight = Mathf.Max(16, resolutionHeight);
         resolutionWidth = Mathf.Max(16, resolutionWidth);
         resolutionDepth = Mathf.Max(16, resolutionDepth);
@@ -554,14 +556,18 @@ public sealed class ImmersiveController : MonoBehaviour
     private Vector2Int ComputeRenderTextureSize(float wallWidth, float wallHeight)
     {
         var pixelsPerMeter = GetPixelsPerMeter();
-        var width = Mathf.Max(16, Mathf.RoundToInt(wallWidth * pixelsPerMeter));
-        var height = Mathf.Max(16, Mathf.RoundToInt(wallHeight * pixelsPerMeter));
-
-        // NDI requires dimensions aligned to 16-pixel blocks.
-        width = AlignUpToMultiple(width, 16);
-        height = AlignUpToMultiple(height, 16);
+        var width = ComputeAlignedResolution(wallWidth, pixelsPerMeter);
+        var height = ComputeAlignedResolution(wallHeight, pixelsPerMeter);
 
         return new Vector2Int(width, height);
+    }
+
+    private static int ComputeAlignedResolution(float surfaceSizeMeters, float pixelsPerMeter)
+    {
+        var resolution = Mathf.Max(16, Mathf.RoundToInt(surfaceSizeMeters * pixelsPerMeter));
+
+        // NDI requires dimensions aligned to 16-pixel blocks.
+        return AlignUpToMultiple(resolution, 16);
     }
 
     private static int AlignUpToMultiple(int value, int multiple)
@@ -577,48 +583,34 @@ public sealed class ImmersiveController : MonoBehaviour
 
     private float GetPixelsPerMeter()
     {
-        switch (resolutionMode)
-        {
-            case ResolutionMode.Height:
-                return resolutionHeight / Mathf.Max(0.01f, roomHeight);
-
-            case ResolutionMode.Width:
-                return resolutionWidth / Mathf.Max(0.01f, roomWidth);
-
-            case ResolutionMode.Depth:
-                return resolutionDepth / Mathf.Max(0.01f, roomDepth);
-
-            default:
-                return resolutionHeight / Mathf.Max(0.01f, roomHeight);
-        }
+        var referenceSizeMeters = GetReferenceDimensionMeters();
+        return desiredResolutionValue / Mathf.Max(0.01f, referenceSizeMeters);
     }
 
     private void NormalizeResolutionInputs()
     {
-        float pixelsPerMeter;
+        var referenceSizeMeters = GetReferenceDimensionMeters();
+        var pixelsPerMeter = desiredResolutionValue / Mathf.Max(0.01f, referenceSizeMeters);
 
+        resolutionWidth = ComputeAlignedResolution(roomWidth, pixelsPerMeter);
+        resolutionHeight = ComputeAlignedResolution(roomHeight, pixelsPerMeter);
+        resolutionDepth = ComputeAlignedResolution(roomDepth, pixelsPerMeter);
+    }
+
+    private float GetReferenceDimensionMeters()
+    {
         switch (resolutionMode)
         {
-            case ResolutionMode.Height:
-                pixelsPerMeter = resolutionHeight / Mathf.Max(0.01f, roomHeight);
-                break;
-
             case ResolutionMode.Width:
-                pixelsPerMeter = resolutionWidth / Mathf.Max(0.01f, roomWidth);
-                break;
+                return roomWidth;
 
             case ResolutionMode.Depth:
-                pixelsPerMeter = resolutionDepth / Mathf.Max(0.01f, roomDepth);
-                break;
+                return roomDepth;
 
+            case ResolutionMode.Height:
             default:
-                pixelsPerMeter = resolutionHeight / Mathf.Max(0.01f, roomHeight);
-                break;
+                return roomHeight;
         }
-
-        resolutionWidth = Mathf.Max(16, Mathf.RoundToInt(roomWidth * pixelsPerMeter));
-        resolutionHeight = Mathf.Max(16, Mathf.RoundToInt(roomHeight * pixelsPerMeter));
-        resolutionDepth = Mathf.Max(16, Mathf.RoundToInt(roomDepth * pixelsPerMeter));
     }
 
     private void UpdateWallMaterial(SurfaceRig rig)
@@ -778,7 +770,7 @@ public sealed class ImmersiveController : MonoBehaviour
     private static bool IsSpoutAllowedOnCurrentGraphicsApi()
     {
         // Spout supports D3D11 only. In a D3D12 editor it will stay disabled.
-        return SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
+        return SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11 || Application.isPlaying;
     }
 
     private static void ConfigureSenderComponent(
