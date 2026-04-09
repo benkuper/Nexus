@@ -22,6 +22,8 @@ public class TileFlipperModifier : TileModifier
     public Texture2D texture1 = null;
     public Texture2D texture2 = null;
 
+    MaterialPropertyBlock materialBlock;
+
     public override void updateTile(Tile tile, float weight)
     {
         float eProg = Mathf.Lerp(-progressionFade - flipRandomness, 1 + progressionFade + flipRandomness, progression);
@@ -51,7 +53,30 @@ public class TileFlipperModifier : TileModifier
         }
 
         Color tileColor = Color.Lerp(color1, color2, flipProg * weight);
-        tile.GetComponent<Renderer>().material.color = tileColor;
-        tile.GetComponent<Renderer>().material.SetTexture("_BaseColorMap", flipProg * weight < 0.5f ? texture1 : texture2);
+
+        Renderer renderer = tile.GetComponentInChildren<Renderer>();
+        Material sharedMaterial = renderer.sharedMaterial;
+
+        if (sharedMaterial == null)
+        {
+            return;
+        }
+        if (materialBlock == null)
+        {
+            materialBlock = new MaterialPropertyBlock();
+        }
+        renderer.GetPropertyBlock(materialBlock);
+
+      
+        if (sharedMaterial.HasProperty("_Base_Color"))
+        {
+            materialBlock.SetColor("_Base_Color", tileColor);
+        }
+
+
+        renderer.SetPropertyBlock(materialBlock);
+
+        // tile.GetComponentInChildren<Renderer>().material.SetColor("_Base_Color", tileColor);
+        // tile.GetComponentInChildren<Renderer>().material.SetTexture("_BaseColorMap", flipProg * weight < 0.5f ? texture1 : texture2);
     }
 }

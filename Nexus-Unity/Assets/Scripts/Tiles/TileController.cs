@@ -38,8 +38,8 @@ public class TileController : MonoBehaviour
     [SerializeField] private Color baseColor = Color.black;
     [SerializeField] private Color borderColor = Color.black;
     [Range(0f, 0.99f)][SerializeField] private float borderWidth = 0f;
-    [Range(0f,100f)] [SerializeField] private float borderIntensity = 1f;
-    
+    [Range(0f, 100f)][SerializeField] private float borderIntensity = 1f;
+
 
     [Header("Live Update")]
     [SerializeField] private bool autoRefresh = true;
@@ -89,7 +89,13 @@ public class TileController : MonoBehaviour
 
     void Update()
     {
-        LayoutTiles();
+        if (autoRefresh)
+        {
+            LayoutTiles();
+        }else
+        {
+            ApplyModifiers();
+        }
     }
 
     [ContextMenu("Refresh Tiles")]
@@ -310,18 +316,18 @@ public class TileController : MonoBehaviour
         {
             materialBlock.SetColor(BaseColorPropertyId, baseColor);
         }
-        
+
         if (sharedMaterial.HasProperty(BorderColorPropertyId))
         {
             materialBlock.SetColor(BorderColorPropertyId, borderColor);
         }
-        
+
         if (sharedMaterial.HasProperty(BorderIntensityPropertyId))
         {
             materialBlock.SetFloat(BorderIntensityPropertyId, borderIntensity);
         }
-        
-        if(sharedMaterial.HasProperty(BorderWidthPropertyId))
+
+        if (sharedMaterial.HasProperty(BorderWidthPropertyId))
         {
             materialBlock.SetFloat(BorderWidthPropertyId, borderWidth);
         }
