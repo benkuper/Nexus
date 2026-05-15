@@ -53,9 +53,9 @@ public sealed class ImmersiveController : MonoBehaviour
     [SerializeField] private GameObject cameraPrefab;
 
     [Header("Room Dimensions (meters)")]
-    [Min(0.01f)] [SerializeField] private float roomWidth = 5f;
-    [Min(0.01f)] [SerializeField] private float roomHeight = 3f;
-    [Min(0.01f)] [SerializeField] private float roomDepth = 5f;
+    [Min(0.01f)][SerializeField] private float roomWidth = 5f;
+    [Min(0.01f)][SerializeField] private float roomHeight = 3f;
+    [Min(0.01f)][SerializeField] private float roomDepth = 5f;
 
     [Header("Enabled Surfaces")]
     [SerializeField] private bool leftWall = true;
@@ -67,12 +67,14 @@ public sealed class ImmersiveController : MonoBehaviour
 
     [Header("Resolution Settings")]
     [SerializeField] private ResolutionMode resolutionMode = ResolutionMode.Height;
-    [Min(16)] [SerializeField] private int desiredResolutionValue = 1080;
-    [Min(16)] [SerializeField] private int resolutionHeight = 1080;
-    [Min(16)] [SerializeField] private int resolutionWidth = 1920;
-    [Min(16)] [SerializeField] private int resolutionDepth = 1080;
+    [Min(16)][SerializeField] private int desiredResolutionValue = 1080;
+    [Min(16)][SerializeField] private int resolutionHeight = 1080;
+    [Min(16)][SerializeField] private int resolutionWidth = 1920;
+    [Min(16)][SerializeField] private int resolutionDepth = 1080;
     [SerializeField] private int depthBufferBits = 24;
     [SerializeField] private RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
+    [Range(1, 4)]
+    [SerializeField] private int resolutionDivider = 1;
 
     [Header("Visual Settings")]
     [SerializeField] private VisualMode visualMode = VisualMode.Default;
@@ -125,6 +127,9 @@ public sealed class ImmersiveController : MonoBehaviour
         resolutionHeight = Mathf.Max(16, resolutionHeight);
         resolutionWidth = Mathf.Max(16, resolutionWidth);
         resolutionDepth = Mathf.Max(16, resolutionDepth);
+
+
+
         NormalizeResolutionInputs();
 
         if (!isActiveAndEnabled)
@@ -519,7 +524,7 @@ public sealed class ImmersiveController : MonoBehaviour
     private void UpdateRenderTexture(SurfaceRig rig)
     {
         GetSurfaceData(rig.id, out _, out _, out _, out var wallWidth, out var wallHeight);
-        var size = ComputeRenderTextureSize(wallWidth, wallHeight);
+        var size = ComputeRenderTextureSize(wallWidth, wallHeight) / resolutionDivider;
 
         if (rig.renderTexture != null && (rig.renderTexture.width != size.x || rig.renderTexture.height != size.y))
         {
