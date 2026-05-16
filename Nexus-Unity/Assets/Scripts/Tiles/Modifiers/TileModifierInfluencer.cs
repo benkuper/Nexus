@@ -12,8 +12,9 @@ public class TileModifierInfluencer : MonoBehaviour
     public AnimationCurve animationCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
 
 
-    virtual public float getWeightAtPos(Vector3 pos)
+    virtual public float getWeightForTile(Tile tile)
     {
+        Vector3 pos = tile.transform.position;
         float r = getRandomnessAtPos(pos);
         return weight * animationCurve.Evaluate(r);
     }

@@ -14,6 +14,16 @@ public class TrailController : MonoBehaviour
 
     public float offset = 0f;
 
+    [Header("Trail Rendering")]
+    public float trailWidth = 1f;
+    public float trailLength = 1f;
+    public int trailSteps = 50;
+    [Range(0,1)]
+    public float trailSpeed = .1f;
+    [Range(0f, 1f)]
+    public float trailSpeedRandomness = 0f;
+    public bool clearTrails;
+
     [System.Serializable]
     public struct TilePosition
     {
@@ -56,8 +66,27 @@ public class TrailController : MonoBehaviour
                 SpawnTrail(posIndex);
             }
             burst = false;
-
         }
+
+        Trail[] trails = GetComponentsInChildren<Trail>();
+        foreach(Trail trail in trails)
+        {
+            trail.trailLength = trailLength;
+            trail.trailWidth = trailWidth;
+            trail.maxSteps = trailSteps;
+            trail.speed = trailSpeed;
+            trail.speedRandomness = trailSpeedRandomness;
+        }
+
+        if(clearTrails)
+        {
+            foreach (Trail trail in trails)
+            {
+                DestroyImmediate(trail.gameObject);
+            }
+            clearTrails = false;
+        }
+
     }
 
     void SpawnTrail(int forcePosIndex = -1)

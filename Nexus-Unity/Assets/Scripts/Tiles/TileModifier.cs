@@ -40,21 +40,23 @@ public class TileModifier : MonoBehaviour
             float totalWeight = weightMode == WeightMode.Multiply ? 1f : 0f;
             foreach (TileModifierInfluencer influencer in influencers)
             {
-                if (influencer == null || !influencer.enabled)
+                if (influencer == null || !influencer.isActiveAndEnabled)
                 {
                     continue;
                 }
                 goodInfluencers++;
+
+                float w = influencer.getWeightForTile(tile);
                 switch (weightMode)
                 {
                     case WeightMode.Average:
-                        totalWeight += influencer.getWeightAtPos(tile.transform.position);
+                        totalWeight += w;
                         break;
                     case WeightMode.Multiply:
-                        totalWeight *= influencer.getWeightAtPos(tile.transform.position);
+                        totalWeight *= w;
                         break;
                     case WeightMode.Max:
-                        totalWeight = Mathf.Max(totalWeight, influencer.getWeightAtPos(tile.transform.position));
+                        totalWeight = Mathf.Max(totalWeight, w);
                         break;
                 }
 

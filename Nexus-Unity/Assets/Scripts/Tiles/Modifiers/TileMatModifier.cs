@@ -9,6 +9,7 @@ public class TileMatModifier : TileModifier
     public Gradient borderOverWeight;
     public float borderWidth = .1f;
     public float borderIntensity = 1f;
+    public float textureWeight = 1f;
     public AnimationCurve weightBorderCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     MaterialPropertyBlock materialBlock;
@@ -59,6 +60,13 @@ public class TileMatModifier : TileModifier
             float initIntensity = materialBlock.GetFloat(TileController.BorderIntensityPropertyId);
             float finalBorderIntensity = Mathf.Lerp(initIntensity, borderIntensity, weightBorderCurve.Evaluate(weight));
             materialBlock.SetFloat(TileController.BorderIntensityPropertyId, finalBorderIntensity);
+        }
+
+        if(sharedMaterial.HasProperty(TileController.TextureWeightPropertyId))
+        {
+            float initTextureWeight = materialBlock.GetFloat(TileController.TextureWeightPropertyId);
+            float finalTextureWeight = Mathf.Lerp(initTextureWeight, textureWeight, weight);
+            materialBlock.SetFloat(TileController.TextureWeightPropertyId, finalTextureWeight);
         }
 
 

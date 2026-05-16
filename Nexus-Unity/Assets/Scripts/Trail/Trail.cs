@@ -13,12 +13,14 @@ public class Trail : MonoBehaviour
 
     [Header("Movement Settings")]
     [Tooltip("Time in seconds to complete the entire path")]
-    [SerializeField] float runTime = 5f;
-    [SerializeField] float runTimeRandomness = 0f;
-    float randomizedRunTime;
+    [Range(0f, 1f)]
+    [SerializeField] public float speed = .1f;
+    [Range(0, 1)]
+    [SerializeField] public float speedRandomness = 0f;
+    float randomizedSpeed;
     [Range(0f, 1f)]
     [SerializeField] float turnProbability = 0.5f;
-    [SerializeField] int maxSteps = 20;
+    [SerializeField] public int maxSteps = 20;
 
 
     [Header("Debug & Controls")]
@@ -28,10 +30,13 @@ public class Trail : MonoBehaviour
 
     [Header("Rendering")]
     public float trailLength = 1f;
+    public float trailWidth = 1f;
     float timeAtFinish = 0f;
 
     // Internal list to hold the calculated world positions of the path
     List<Vector3> positions = new List<Vector3>();
+
+    TrailRenderer trail;
 
     // 4 possible grid directions: Right, Left, Up, Down
     private readonly Vector2Int[] directions = new Vector2Int[]
@@ -48,6 +53,8 @@ public class Trail : MonoBehaviour
         {
             GeneratePath();
         }
+
+        trail = GetComponent<TrailRenderer>();
     }
 
     void Update()
@@ -62,12 +69,13 @@ public class Trail : MonoBehaviour
         if (positions == null || positions.Count < 2) return;
 
         // Progress the movement over time
-        progression = Mathf.Clamp01(progression + Time.deltaTime / randomizedRunTime);
+        progression += (speed - randomizedSpeed * speedRandomness) * Time.deltaTime;
 
         // Calculate current index and the next index in the positions list
         float virtualIndex = progression * (positions.Count - 1);
         int progIndex = Mathf.FloorToInt(virtualIndex);
 
+        if(progIndex < 0 || progIndex >= positions.Count - 1) return;
         Vector3 pos1 = positions[progIndex];
         Vector3 pos2 = positions[Mathf.Min(progIndex + 1, positions.Count - 1)];
 
@@ -77,6 +85,11 @@ public class Trail : MonoBehaviour
 
         // Update the actual GameObject position to move it
         transform.position = targetPosition;
+
+        float progMap = Mathf.Clamp01((progression - .9f) / .1f);
+        if (trail == null) trail = GetComponent<TrailRenderer>();
+        trail.time = trailLength * (1 - progMap);
+        trail.widthMultiplier = trailWidth;
 
         // Handle trail destruction after completing the path
         if (progression >= 1f)
@@ -110,7 +123,7 @@ public class Trail : MonoBehaviour
         this.startX = startX;
         this.startY = startY;
         this.offset = offset;
-        randomizedRunTime = runTime + Random.Range(-runTimeRandomness, runTimeRandomness);
+        randomizedSpeed = Random.value;
         GeneratePath();
     }
 
@@ -163,7 +176,7 @@ public class Trail : MonoBehaviour
 
             // Remember this tile so we don't return here
             visitedTiles.Add(new Vector2Int(currentX, currentY));
-            positions.Add(tileController.getPositionAt(currentX, currentY,true, offset));
+            positions.Add(tileController.getPositionAt(currentX, currentY, true, offset));
 
 
             if (stepsTaken >= maxSteps)

@@ -100,8 +100,8 @@ TrailRenderer:
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 0.0329628
-        value: 0.9816036
+        time: 0.047561646
+        value: 0.49526024
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -132,7 +132,7 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.9277679, g: 0.94287413, b: 0.9622642, a: 1}
-      key1: {r: 1, g: 0.7400235, b: 0.2320754, a: 1}
+      key1: {r: 0.057223175, g: 0.45085666, b: 0.645283, a: 1}
       key2: {r: 0.5224421, g: 0.8168777, b: 0.9924528, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -140,7 +140,7 @@ TrailRenderer:
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
-      ctime1: 14418
+      ctime1: 17348
       ctime2: 65535
       ctime3: 0
       ctime4: 0
@@ -185,10 +185,11 @@ MonoBehaviour:
   startX: 0
   startY: 0
   offset: 0
-  runTime: 20
-  runTimeRandomness: 6
+  speed: 0.1
+  speedRandomness: 0
   turnProbability: 0.498
   maxSteps: 50
   reset: 0
   progression: 0
   trailLength: 5
+  trailWidth: 1

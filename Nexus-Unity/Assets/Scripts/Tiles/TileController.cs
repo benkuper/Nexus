@@ -6,11 +6,12 @@ using System;
 using UnityEditor;
 #endif
 
+[OSCQuery.DoNotExposeChildren]
 [ExecuteAlways]
 public class TileController : MonoBehaviour
 {
     public static readonly int BaseColorPropertyId = Shader.PropertyToID("_Base_Color");
-    public static readonly int MainTexStPropertyId = Shader.PropertyToID("_MainTex_ST");
+    public static readonly int MainTexStPropertyId = Shader.PropertyToID("_Texture_ST");
 
     public static readonly int BorderWidthPropertyId = Shader.PropertyToID("_Border_Width");
     public static readonly int BorderColorPropertyId = Shader.PropertyToID("_Border_Color");
@@ -20,11 +21,15 @@ public class TileController : MonoBehaviour
 
     public static readonly int MetallicPropertyId = Shader.PropertyToID("_Metallic");
     public static readonly int SmoothnessPropertyId = Shader.PropertyToID("_Smoothness");
+    public static readonly int TextureWeightPropertyId = Shader.PropertyToID("_Texture_Alpha");
 
 
     [Header("Grid Bounds")]
     [Min(0f)] public float totalWidth = 10f;
     [Min(0f)] public float totalHeight = 10f;
+    [Min(0f)] public float totalAllWallsWidth = 1f;
+    [Min(0f)] public float wallOffset = 0.5f;
+    [Min(0f)] public float relativeHeight = 1f;
 
     [Header("Grid Count")]
     [Min(0)][SerializeField] private int horizontalCount = 5;
@@ -53,6 +58,7 @@ public class TileController : MonoBehaviour
     [Range(0f, 1)][SerializeField] private float borderIntensity = 1f;
     [Range(0f, 1f)][SerializeField] private float horizontally = 0f;
     [Range(0f, 1f)][SerializeField] private float vertically = 0f;
+    [Range(0f, 1f)][SerializeField] private float textureWeight = 1f;
 
     [Header("Live Update")]
     [SerializeField] private bool autoRefresh = true;
@@ -332,11 +338,15 @@ public class TileController : MonoBehaviour
 
         renderer.GetPropertyBlock(materialBlock);
 
+        float wallRelativeWidth = totalWidth / totalAllWallsWidth;
+        float wallRelativeOffsetX = wallOffset / totalAllWallsWidth;
+        float wallRelativeOffsetY = 1 - relativeHeight;
+
         Vector4 textureSt = new Vector4(
-            -1f / Mathf.Max(1, horizontalCount),
-            -1f / Mathf.Max(1, verticalCount),
-            (float)x / Mathf.Max(1, horizontalCount),
-            (float)y / Mathf.Max(1, verticalCount)
+            -wallRelativeWidth / Mathf.Max(1, horizontalCount),
+            -relativeHeight / Mathf.Max(1, verticalCount),
+            wallRelativeOffsetX + ((float)(x+1) / Mathf.Max(1, horizontalCount)) * wallRelativeWidth,
+            wallRelativeOffsetY + ((float)(y+1) / Mathf.Max(1, verticalCount)) * relativeHeight
         );
 
         if (sharedMaterial.HasProperty(MainTexStPropertyId))
@@ -382,6 +392,11 @@ public class TileController : MonoBehaviour
         if (sharedMaterial.HasProperty(VerticalBorderPropertyId))
         {
             materialBlock.SetFloat(VerticalBorderPropertyId, vertically);
+        }
+
+        if( sharedMaterial.HasProperty(TextureWeightPropertyId))
+        {
+            materialBlock.SetFloat(TextureWeightPropertyId, textureWeight);
         }
 
 

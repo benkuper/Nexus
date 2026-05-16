@@ -3,8 +3,9 @@ using UnityEngine;
 public class TileSphereInfluencer : TileModifierInfluencer
 {
 
-    public override float getWeightAtPos(Vector3 pos)
+    public override float getWeightForTile(Tile tile)
     {
+        Vector3 pos = tile.transform.position;
         Vector3 localPos = transform.InverseTransformPoint(pos);
         
         float noise = getRandomnessAtPos(pos);

@@ -19,8 +19,20 @@ public class TileFlipperModifier : TileModifier
 
     public Color color1 = Color.white;
     public Color color2 = Color.red;
-    public Texture2D texture1 = null;
-    public Texture2D texture2 = null;
+
+    [Range(0f, 1f)]
+    public float texWeight1 = 1f;
+    [Range(0f, 1f)]
+    public float texWeight2 = 1f;
+
+    [Range(0f, 1f)]
+    public float lineHWeight1 = 1f;
+    [Range(0f, 1f)]
+    public float lineHWeight2 = 1f;
+    [Range(0f, 1f)]
+    public float lineVWeight1 = 1f;
+    [Range(0f, 1f)]
+    public float lineVWeight2 = 1f;
 
     MaterialPropertyBlock materialBlock;
 
@@ -57,6 +69,7 @@ public class TileFlipperModifier : TileModifier
         Renderer renderer = tile.GetComponentInChildren<Renderer>();
         Material sharedMaterial = renderer.sharedMaterial;
 
+
         if (sharedMaterial == null)
         {
             return;
@@ -68,15 +81,13 @@ public class TileFlipperModifier : TileModifier
         renderer.GetPropertyBlock(materialBlock);
 
       
-        if (sharedMaterial.HasProperty("_Base_Color"))
+        if (sharedMaterial.HasProperty(TileController.BaseColorPropertyId))
         {
-            materialBlock.SetColor("_Base_Color", tileColor);
+            materialBlock.SetColor(TileController.BaseColorPropertyId, tileColor);
         }
 
 
         renderer.SetPropertyBlock(materialBlock);
 
-        // tile.GetComponentInChildren<Renderer>().material.SetColor("_Base_Color", tileColor);
-        // tile.GetComponentInChildren<Renderer>().material.SetTexture("_BaseColorMap", flipProg * weight < 0.5f ? texture1 : texture2);
     }
 }
