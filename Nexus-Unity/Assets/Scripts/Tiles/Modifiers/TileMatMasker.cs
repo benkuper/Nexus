@@ -16,7 +16,5 @@ public class TileMatMasker : TileModifier
         {
             tile.GetComponentInChildren<Renderer>().enabled = true;
         }
-
-
     }
 }

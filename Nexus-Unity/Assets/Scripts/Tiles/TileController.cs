@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -7,12 +9,17 @@ using UnityEditor;
 [ExecuteAlways]
 public class TileController : MonoBehaviour
 {
-    private static readonly int BaseColorPropertyId = Shader.PropertyToID("_Base_Color");
-    private static readonly int MainTexStPropertyId = Shader.PropertyToID("_MainTex_ST");
+    public static readonly int BaseColorPropertyId = Shader.PropertyToID("_Base_Color");
+    public static readonly int MainTexStPropertyId = Shader.PropertyToID("_MainTex_ST");
 
-    private static readonly int BorderWidthPropertyId = Shader.PropertyToID("_Border_Width");
-    private static readonly int BorderColorPropertyId = Shader.PropertyToID("_Border_Color");
-    private static readonly int BorderIntensityPropertyId = Shader.PropertyToID("_Border_Intensity");
+    public static readonly int BorderWidthPropertyId = Shader.PropertyToID("_Border_Width");
+    public static readonly int BorderColorPropertyId = Shader.PropertyToID("_Border_Color");
+    public static readonly int BorderIntensityPropertyId = Shader.PropertyToID("_Border_Intensity");
+    public static readonly int HorizontalBorderPropertyId = Shader.PropertyToID("_Horizontal_Border");
+    public static readonly int VerticalBorderPropertyId = Shader.PropertyToID("_Vertical_Border");
+
+    public static readonly int MetallicPropertyId = Shader.PropertyToID("_Metallic");
+    public static readonly int SmoothnessPropertyId = Shader.PropertyToID("_Smoothness");
 
 
     [Header("Grid Bounds")]
@@ -34,12 +41,18 @@ public class TileController : MonoBehaviour
     [Min(0f)][SerializeField] private float tileDepth = 0.1f;
     [SerializeField] private string tileName = "Tile";
 
+    [Header("Modifiers")]
+    public GameObject globalModifiers;
+
     [Header("Material Settings")]
     [SerializeField] private Color baseColor = Color.black;
     [SerializeField] private Color borderColor = Color.black;
+    [Range(0f, 1)][SerializeField] private float metallic = 0f;
+    [Range(0f, 1)][SerializeField] private float smoothness = 0f;
     [Range(0f, 0.99f)][SerializeField] private float borderWidth = 0f;
-    [Range(0f, 100f)][SerializeField] private float borderIntensity = 1f;
-
+    [Range(0f, 1)][SerializeField] private float borderIntensity = 1f;
+    [Range(0f, 1f)][SerializeField] private float horizontally = 0f;
+    [Range(0f, 1f)][SerializeField] private float vertically = 0f;
 
     [Header("Live Update")]
     [SerializeField] private bool autoRefresh = true;
@@ -92,7 +105,8 @@ public class TileController : MonoBehaviour
         if (autoRefresh)
         {
             LayoutTiles();
-        }else
+        }
+        else
         {
             ApplyModifiers();
         }
@@ -268,10 +282,12 @@ public class TileController : MonoBehaviour
                 tile.transform.localRotation = Quaternion.identity;
                 tile.transform.localScale = resolvedTileScale;
 
+
                 // set material uv tiling and offset based on grid size
                 Renderer renderer = tile.GetComponentInChildren<Renderer>();
                 if (renderer != null)
                 {
+                    renderer.enabled = true;
                     ApplyTileMaterial(renderer, x, y);
                 }
 
@@ -282,6 +298,22 @@ public class TileController : MonoBehaviour
 
         ApplyModifiers();
 
+    }
+
+    public Vector3 getPositionAt(int x, int y, bool returnCorner = true, float offset = 0f)
+    {
+        float tileWidth = GetTileSize(totalWidth, horizontalCount, spread);
+        float tileHeight = GetTileSize(totalHeight, verticalCount, spread);
+        float strideX = tileWidth + spread;
+        float strideY = tileHeight + spread;
+        float startX = centerGrid ? -((horizontalCount - 1) * strideX) * 0.5f : tileWidth * 0.5f;
+        float startY = centerGrid ? -((verticalCount - 1) * strideY) * 0.5f : tileHeight * 0.5f;
+        if (returnCorner)
+        {
+            startX -= tileWidth * 0.5f;
+            startY -= tileHeight * 0.5f;
+        }
+        return transform.TransformPoint(new Vector3(startX + (x * strideX), startY + (y * strideY), 0f) + Vector3.forward * offset);
     }
 
     private void ApplyTileMaterial(Renderer renderer, int x, int y)
@@ -332,6 +364,27 @@ public class TileController : MonoBehaviour
             materialBlock.SetFloat(BorderWidthPropertyId, borderWidth);
         }
 
+        if (sharedMaterial.HasProperty(MetallicPropertyId))
+        {
+            materialBlock.SetFloat(MetallicPropertyId, metallic);
+        }
+
+        if (sharedMaterial.HasProperty(SmoothnessPropertyId))
+        {
+            materialBlock.SetFloat(SmoothnessPropertyId, smoothness);
+        }
+
+        if (sharedMaterial.HasProperty(HorizontalBorderPropertyId))
+        {
+            materialBlock.SetFloat(HorizontalBorderPropertyId, horizontally);
+        }
+
+        if (sharedMaterial.HasProperty(VerticalBorderPropertyId))
+        {
+            materialBlock.SetFloat(VerticalBorderPropertyId, vertically);
+        }
+
+
         renderer.SetPropertyBlock(materialBlock);
     }
 
@@ -339,10 +392,21 @@ public class TileController : MonoBehaviour
     {
         TileModifier[] modifiers = GetComponents<TileModifier>();
 
+        Tile[] tiles = generatedTiles.ToArray();
         foreach (TileModifier modifier in modifiers)
         {
             if (!modifier.enabled) continue;
-            modifier.updateTiles();
+            modifier.updateTiles(tiles);
+        }
+
+        if (globalModifiers != null)
+        {
+            TileModifier[] globalMods = globalModifiers.GetComponents<TileModifier>();
+            foreach (TileModifier modifier in globalMods)
+            {
+                if (!modifier.enabled) continue;
+                modifier.updateTiles(tiles);
+            }
         }
     }
 
@@ -371,5 +435,10 @@ public class TileController : MonoBehaviour
         }
 
         DestroyImmediate(tile.gameObject);
+    }
+
+    public bool IsValidTile(int targetX, int targetY)
+    {
+        return targetX >= 0 && targetX < horizontalCount && targetY >= 0 && targetY < verticalCount;
     }
 }
