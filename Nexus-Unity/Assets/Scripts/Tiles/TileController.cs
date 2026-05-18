@@ -32,8 +32,8 @@ public class TileController : MonoBehaviour
     [Min(0f)] public float relativeHeight = 1f;
 
     [Header("Grid Count")]
-    [Min(0)][SerializeField] private int horizontalCount = 5;
-    [Min(0)][SerializeField] private int verticalCount = 5;
+    [Min(0)][SerializeField] public int horizontalCount = 5;
+    [Min(0)][SerializeField] public int verticalCount = 5;
 
     [Header("Layout")]
     [Range(0f, 1f)]

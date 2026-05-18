@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static Trail;
 
 [ExecuteInEditMode]
 public class Trail : MonoBehaviour
@@ -12,31 +13,42 @@ public class Trail : MonoBehaviour
     [SerializeField] float offset;
 
     [Header("Movement Settings")]
-    [Tooltip("Time in seconds to complete the entire path")]
-    [Range(0f, 1f)]
-    [SerializeField] public float speed = .1f;
+    [Tooltip("Speed in steps per second")]
+    [Range(0f, 10f)]
+    [SerializeField] public float speed = 1f;
     [Range(0, 1)]
     [SerializeField] public float speedRandomness = 0f;
-    float randomizedSpeed;
     [Range(0f, 1f)]
     [SerializeField] float turnProbability = 0.5f;
-    [SerializeField] public int maxSteps = 20;
+    [Range(0f, 1f)]
+    [SerializeField] public float escapeProbability = 0;
+    public enum EscapeDirection { Right, Left, Up, Down }
+    public EscapeDirection[] escapeDirections;
 
+    [SerializeField] public float maxLife = 1f;
+    float timeAtStart = 0f;
+
+    public float uniqueRandomness = 0f;
 
     [Header("Debug & Controls")]
     [SerializeField] bool reset;
-    [Range(0f, 1f)]
-    [SerializeField] float progression = 0f;
 
     [Header("Rendering")]
     public float trailLength = 1f;
     public float trailWidth = 1f;
-    float timeAtFinish = 0f;
 
-    // Internal list to hold the calculated world positions of the path
-    List<Vector3> positions = new List<Vector3>();
+    // Current state for live path calculation
+    private int currentX;
+    private int currentY;
+    private Vector2Int currentDir;
+    private HashSet<Vector2Int> visitedTiles = new HashSet<Vector2Int>();
+    private float stepTimer = 0f;
+    private bool pathEnded = false;
 
     TrailRenderer trail;
+
+    Vector3 prevPos;
+    Vector3 targetPos;
 
     // 4 possible grid directions: Right, Left, Up, Down
     private readonly Vector2Int[] directions = new Vector2Int[]
@@ -49,12 +61,12 @@ public class Trail : MonoBehaviour
 
     void Start()
     {
+        trail = GetComponent<TrailRenderer>();
+
         if (tileController != null)
         {
-            GeneratePath();
+            InitializePathState();
         }
-
-        trail = GetComponent<TrailRenderer>();
     }
 
     void Update()
@@ -65,56 +77,58 @@ public class Trail : MonoBehaviour
             reset = false;
         }
 
-        // Safety check: Don't move if we have no path generated
-        if (positions == null || positions.Count < 2) return;
+        // Safety check: Don't move if we have no tile controller*
+        if (tileController == null) return;
 
-        // Progress the movement over time
-        progression += (speed - randomizedSpeed * speedRandomness) * Time.deltaTime;
+        // Calculate age
+        float age = Time.time - timeAtStart;
 
-        // Calculate current index and the next index in the positions list
-        float virtualIndex = progression * (positions.Count - 1);
-        int progIndex = Mathf.FloorToInt(virtualIndex);
+        // Handle destruction based on life only
+        if (age >= maxLife)
+        {
+            if (Application.isPlaying)
+                Destroy(gameObject);
+            else
+                DestroyImmediate(gameObject);
+            return;
+        }
 
-        if(progIndex < 0 || progIndex >= positions.Count - 1) return;
-        Vector3 pos1 = positions[progIndex];
-        Vector3 pos2 = positions[Mathf.Min(progIndex + 1, positions.Count - 1)];
-
-        // Linearly interpolate between the two points
-        float segmentProgression = virtualIndex % 1f;
-        Vector3 targetPosition = Vector3.Lerp(pos1, pos2, segmentProgression);
-
-        // Update the actual GameObject position to move it
-        transform.position = targetPosition;
-
-        float progMap = Mathf.Clamp01((progression - .9f) / .1f);
+        // Update trail appearance based on life
+        float lifeMap = Mathf.Clamp01(((age / maxLife) - .8f) / .2f);
         if (trail == null) trail = GetComponent<TrailRenderer>();
-        trail.time = trailLength * (1 - progMap);
+        trail.time = trailLength * (1 - lifeMap);
         trail.widthMultiplier = trailWidth;
 
-        // Handle trail destruction after completing the path
-        if (progression >= 1f)
+
+        // Don't continue moving if path has ended
+        if (pathEnded)
         {
-            if (timeAtFinish == 0f)
-            {
-                timeAtFinish = Time.time;
-            }
-            else if (Time.time - timeAtFinish > trailLength)
-            {
-                if (Application.isPlaying)
-                    Destroy(gameObject);
-                else
-                    DestroyImmediate(gameObject);
-            }
-            // REMOVED: The 'else { timeAtFinish = 0f; }' block was resetting the timer 
-            // every frame after the first, preventing destruction.
+            return;
         }
+
+        // Step timer for live path calculation
+        stepTimer += (speed - uniqueRandomness * speedRandomness) * Time.deltaTime;
+
+        // Take a step when timer reaches 1 (1 step per second at speed=1)
+        if (stepTimer >= 1f)
+        {
+            stepTimer -= 1f;
+            TakeStep();
+        }
+
+        Vector3 finalPos = Vector3.Lerp(prevPos, targetPos, stepTimer);
+        transform.position = finalPos;
     }
 
     public void ResetTrail()
     {
-        progression = 0f;
-        timeAtFinish = 0f; // Reset the destruction timer
-        GeneratePath();
+        stepTimer = 0f;
+        pathEnded = false;
+        InitializePathState();
+
+        // Clear trail renderer
+        if (trail == null) trail = GetComponent<TrailRenderer>();
+        trail.Clear();
     }
 
     public void Init(TileController tileController, int startX, int startY, float offset)
@@ -123,11 +137,12 @@ public class Trail : MonoBehaviour
         this.startX = startX;
         this.startY = startY;
         this.offset = offset;
-        randomizedSpeed = Random.value;
-        GeneratePath();
+        uniqueRandomness = Random.value;
+        timeAtStart = Time.time;
+        InitializePathState();
     }
 
-    public void GeneratePath()
+    private void InitializePathState()
     {
         if (tileController == null)
         {
@@ -135,57 +150,81 @@ public class Trail : MonoBehaviour
             return;
         }
 
-        positions.Clear();
+        visitedTiles.Clear();
+        currentX = startX;
+        currentY = startY;
+        prevPos = tileController.getPositionAt(currentX, currentY, true, offset);
+        targetPos = prevPos;
+        pathEnded = false;
 
-        // Track the grid positions we have already visited during this generation
-        HashSet<Vector2Int> visitedTiles = new HashSet<Vector2Int>();
-
-        int currentX = startX;
-        int currentY = startY;
-
-        // Mark the starting tile as visited and add its world position
+        // Mark starting tile as visited
         visitedTiles.Add(new Vector2Int(currentX, currentY));
-        positions.Add(tileController.getPositionAt(currentX, currentY, true, offset));
 
-        // Pick an initial random direction to start moving
-        Vector2Int currentDir = directions[Random.Range(0, directions.Length)];
+        // Set initial position
+        transform.position = tileController.getPositionAt(currentX, currentY, true, offset);
 
-        bool pathFinding = true;
-        int stepsTaken = 0;
-        while (pathFinding)
+        // Pick an initial random direction
+        currentDir = directions[Random.Range(0, directions.Length)];
+    }
+
+    private void TakeStep()
+    {
+        // Get valid directions from current position
+        List<Vector2Int> validDirections = GetValidDirections(currentX, currentY, visitedTiles);
+
+        // If trapped, stop the path
+        if (validDirections.Count == 0)
         {
-            // Pass the visited list to filter out backtracking
-            List<Vector2Int> validDirections = GetValidDirections(currentX, currentY, visitedTiles);
+            pathEnded = true;
+            return;
+        }
 
-            // If trapped (walls, boundaries, or self-intersections), stop.
-            if (validDirections.Count == 0)
+        // Decide whether to turn or keep going straight based on probability
+        if (Random.value < turnProbability || !validDirections.Contains(currentDir))
+        {
+            bool usePreferredDir = Random.value < escapeProbability;
+
+            if (usePreferredDir && escapeDirections != null && escapeDirections.Length > 0)
             {
-                pathFinding = false;
-                break;
-            }
+                List<Vector2Int> preferred = new List<Vector2Int>();
+                foreach (EscapeDirection escapeDir in escapeDirections)
+                {
+                    preferred.Add(directions[(int)escapeDir]);
+                }
+                List<Vector2Int> validPreferred = validDirections.FindAll(d => preferred.Contains(d));
 
-            // Decide whether to turn or keep going straight based on probability
-            if (Random.value < turnProbability || !validDirections.Contains(currentDir))
+                if (validPreferred.Count > 0)
+                {
+                    currentDir = validPreferred[Random.Range(0, validPreferred.Count)];
+                }
+                else
+                {
+                    pathEnded = true;
+                    return;
+                }
+            }
+            else
             {
                 currentDir = validDirections[Random.Range(0, validDirections.Count)];
             }
-
-            // Move coordinates forward
-            currentX += currentDir.x;
-            currentY += currentDir.y;
-
-            // Remember this tile so we don't return here
-            visitedTiles.Add(new Vector2Int(currentX, currentY));
-            positions.Add(tileController.getPositionAt(currentX, currentY, true, offset));
-
-
-            if (stepsTaken >= maxSteps)
-            {
-                break;
-            }
-            stepsTaken++;
         }
+
+        // Move to the next position
+
+        
+        prevPos = tileController.getPositionAt(currentX, currentY, true, offset);
+        currentX += currentDir.x;
+        currentY += currentDir.y;
+
+        // Mark new tile as visited
+
+        visitedTiles.Add(new Vector2Int(currentX, currentY));
+
+        // Update position
+        targetPos = tileController.getPositionAt(currentX, currentY, true, offset);
+        
     }
+
 
     /// <summary>
     /// Checks all 4 adjacent tiles to see which ones are valid moves and haven't been visited.

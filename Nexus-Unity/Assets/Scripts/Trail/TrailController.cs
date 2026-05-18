@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[OSCQuery.DoNotExposeChildren]
 [ExecuteInEditMode]
 public class TrailController : MonoBehaviour
 {
@@ -11,17 +12,25 @@ public class TrailController : MonoBehaviour
     float timeAtLastSpawn = 0f;
 
     public bool continuousSpawn;
+    public int trailsPerSpawn = 1;
+    public int continuousSpawnIndex = -1;
 
     public float offset = 0f;
 
     [Header("Trail Rendering")]
     public float trailWidth = 1f;
     public float trailLength = 1f;
-    public int trailSteps = 50;
-    [Range(0,1)]
+    public float trailLife = 1f;
+    [Range(0, 1)]
+    public float trailLifeRandomness = .2f;
+    [Range(0, 20)]
     public float trailSpeed = .1f;
     [Range(0f, 1f)]
     public float trailSpeedRandomness = 0f;
+    [Range(0f, 1f)]
+    public float trailEscapeProbability = 0f;
+    public List<Trail.EscapeDirection> trailEscapeDirections;
+
     public bool clearTrails;
 
     [System.Serializable]
@@ -32,6 +41,7 @@ public class TrailController : MonoBehaviour
 
     [SerializeField] List<TilePosition> startPositions;
 
+    public int burstIndex = 0;
     public bool burst;
     public int burstCount = 10;
 
@@ -53,32 +63,37 @@ public class TrailController : MonoBehaviour
         {
             if (Time.time - timeAtLastSpawn >= 1.0f / spawnRate)
             {
-                SpawnTrail();
+                for (int i = 0; i < trailsPerSpawn; i++)
+                {
+                    SpawnTrail(continuousSpawnIndex);
+                }
+
                 timeAtLastSpawn = Time.time;
             }
         }
 
-        if(burst)
+        if (burst)
         {
-            int posIndex = Random.Range(0, startPositions.Count);
             for (int i = 0; i < burstCount; i++)
             {
-                SpawnTrail(posIndex);
+                SpawnTrail(burstIndex);
             }
             burst = false;
         }
 
         Trail[] trails = GetComponentsInChildren<Trail>();
-        foreach(Trail trail in trails)
+        foreach (Trail trail in trails)
         {
             trail.trailLength = trailLength;
             trail.trailWidth = trailWidth;
-            trail.maxSteps = trailSteps;
+            trail.maxLife = trailLife - trail.uniqueRandomness * trailLife;
             trail.speed = trailSpeed;
             trail.speedRandomness = trailSpeedRandomness;
+            trail.escapeDirections = trailEscapeDirections.ToArray();
+            trail.escapeProbability = trailEscapeProbability;
         }
 
-        if(clearTrails)
+        if (clearTrails)
         {
             foreach (Trail trail in trails)
             {
@@ -91,8 +106,8 @@ public class TrailController : MonoBehaviour
 
     void SpawnTrail(int forcePosIndex = -1)
     {
-        if(startPositions.Count == 0) return;
-        TilePosition startPos = startPositions[forcePosIndex >= 0 ? forcePosIndex % startPositions.Count : Random.Range(0, startPositions.Count)];
+        if (startPositions.Count == 0) return;
+        TilePosition startPos = forcePosIndex >= 0 ? startPositions[forcePosIndex % startPositions.Count] : getRandomPosition();
 
         Vector3 pos = tileController.getPositionAt(startPos.x, startPos.y, true, offset);
         GameObject newTrail = Instantiate(trailPrefab, pos, Quaternion.identity);
@@ -103,5 +118,13 @@ public class TrailController : MonoBehaviour
         {
             trailComponent.Init(tileController, startPos.x, startPos.y, offset);
         }
+    }
+
+    TilePosition getRandomPosition()
+    {
+        TilePosition result = new TilePosition();
+        result.x = Random.Range(0, tileController.horizontalCount);
+        result.y = Random.Range(0, tileController.verticalCount);
+        return result;
     }
 }
