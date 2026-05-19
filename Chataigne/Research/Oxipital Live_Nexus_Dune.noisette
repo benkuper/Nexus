@@ -41936,7 +41936,7 @@
                         "dancerIntensity": {
                           "parameters": [
                             {
-                              "value": 0.2433333694934845,
+                              "value": 0.2301073372364044,
                               "minValue": 0.0,
                               "maxValue": 1.0,
                               "default": 1.0,
@@ -42599,6 +42599,7 @@
                   "controlAddress": "/framecount"
                 }
               ],
+              "editorIsCollapsed": true,
               "owned": true,
               "niceName": "TimecodeDisplay"
             },
@@ -44453,7 +44454,7 @@
                               "controlAddress": "/dancerHyperSize"
                             },
                             {
-                              "value": 0.2433333694934845,
+                              "value": 0.2301073372364044,
                               "controlAddress": "/dancerIntensity"
                             },
                             {
@@ -55431,7 +55432,7 @@
           },
           "DESCRIPTION": "Root Scene"
         },
-        "hasListenExtension": true
+        "hasListenExtension": false
       },
       {
         "parameters": [
@@ -88868,7 +88869,7 @@
             {
               "parameters": [
                 {
-                  "value": 0.2433333694934845,
+                  "value": 0.2301073372364044,
                   "minValue": 0,
                   "maxValue": 1,
                   "default": 0.0,
@@ -100029,7 +100030,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 162.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -101912,7 +101913,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 162.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -102555,7 +102556,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 162.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -103288,7 +103289,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 110.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -103637,7 +103638,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 188.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -106127,7 +106128,7 @@
             {
               "parameters": [
                 {
-                  "value": 110.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -117345,7 +117346,7 @@
             {
               "parameters": [
                 {
-                  "value": 162.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -119657,7 +119658,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 214.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -122005,7 +122006,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 214.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -128913,7 +128914,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 266.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -134828,7 +134829,7 @@
             {
               "parameters": [
                 {
-                  "value": 24.0,
+                  "value": 110.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -135847,7 +135848,7 @@
             {
               "parameters": [
                 {
-                  "value": 110.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -137320,7 +137321,7 @@
             {
               "parameters": [
                 {
-                  "value": 24.0,
+                  "value": 110.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -138423,7 +138424,7 @@
             {
               "parameters": [
                 {
-                  "value": 110.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -139446,7 +139447,7 @@
             {
               "parameters": [
                 {
-                  "value": 110.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -140300,7 +140301,7 @@
             {
               "parameters": [
                 {
-                  "value": 24.0,
+                  "value": 110.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -141954,7 +141955,7 @@
             {
               "parameters": [
                 {
-                  "value": 110.0,
+                  "value": 24.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -143278,7 +143279,7 @@
             {
               "parameters": [
                 {
-                  "value": 24.0,
+                  "value": 110.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -145662,7 +145663,7 @@
             {
               "parameters": [
                 {
-                  "value": 24.0,
+                  "value": 84.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -151756,7 +151757,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 84.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -156314,7 +156315,7 @@
                   "controlAddress": "/enabled"
                 },
                 {
-                  "value": 24.0,
+                  "value": 162.0,
                   "controlAddress": "/listSize"
                 },
                 {
@@ -161522,7 +161523,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 42.26666641235352,
+                      "value": 37.25,
                       "controlAddress": "/position"
                     },
                     {
@@ -161808,7 +161809,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 42.26666641235352,
+                      "value": 37.25,
                       "controlAddress": "/position"
                     },
                     {
@@ -162110,7 +162111,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 42.26666641235352,
+                      "value": 37.25,
                       "controlAddress": "/position"
                     },
                     {
