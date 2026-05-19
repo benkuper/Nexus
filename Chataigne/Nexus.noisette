@@ -4,6 +4,12 @@
     "versionNumber": 68099
   },
   "projectSettings": {
+    "parameters": [
+      {
+        "value": true,
+        "controlAddress": "/saveLayoutInFile"
+      }
+    ],
     "containers": {
       "dashboardSettings": {
         "parameters": [
@@ -11,6 +17,15 @@
             "value": "",
             "controlAddress": "/showDashboardOnStartup",
             "enabled": false
+          },
+          {
+            "value": true,
+            "controlAddress": "/enableDashboardServer"
+          },
+          {
+            "value": 2222,
+            "hexMode": false,
+            "controlAddress": "/serverPort"
           }
         ]
       },
@@ -19,6 +34,21 @@
     }
   },
   "dashboardManager": {
+    "parameters": [
+      {
+        "value": false,
+        "controlAddress": "/editMode"
+      },
+      {
+        "value": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "controlAddress": "/tabsBGColor"
+      }
+    ],
     "viewOffset": [
       0,
       0
@@ -287,6 +317,12 @@
         }
       },
       {
+        "parameters": [
+          {
+            "value": false,
+            "controlAddress": "/enabled"
+          }
+        ],
         "niceName": "TD_OSCQuery",
         "type": "OSCQuery",
         "scripts": {
@@ -3453,6 +3489,21 @@
     "viewZoom": 1.0
   },
   "states": {
+    "parameters": [
+      {
+        "value": true,
+        "controlAddress": "/snapGridMode"
+      },
+      {
+        "value": false,
+        "controlAddress": "/showSnapGrid"
+      },
+      {
+        "value": 20,
+        "hexMode": false,
+        "controlAddress": "/snapGridSize"
+      }
+    ],
     "viewOffset": [
       0,
       0
@@ -5218,8 +5269,322 @@
             0
           ],
           "viewZoom": 1.0
+        }
+      },
+      {
+        "parameters": [
+          {
+            "value": 561.8,
+            "controlAddress": "/totalTime"
+          },
+          {
+            "value": 79.3712158203125,
+            "controlAddress": "/viewStartTime"
+          },
+          {
+            "value": 285.7862548828125,
+            "controlAddress": "/viewEndTime"
+          },
+          {
+            "value": "",
+            "controlAddress": "/ltcSyncModule",
+            "enabled": false
+          }
+        ],
+        "niceName": "Show",
+        "type": "Sequence",
+        "layers": {
+          "hideInEditor": true,
+          "items": [
+            {
+              "parameters": [
+                {
+                  "value": 60.0,
+                  "controlAddress": "/listSize"
+                }
+              ],
+              "niceName": "Trigger",
+              "type": "Trigger",
+              "triggers": {
+                "hideInEditor": true,
+                "items": [
+                  {
+                    "parameters": [
+                      {
+                        "value": 0.0,
+                        "controlAddress": "/time"
+                      },
+                      {
+                        "value": 0.05833333730697632,
+                        "controlAddress": "/flagY"
+                      }
+                    ],
+                    "niceName": "Start Show",
+                    "type": "TimeTrigger",
+                    "consequences": {
+                      "parameters": [
+                        {
+                          "value": false,
+                          "controlAddress": "/cancelDelaysOnTrigger"
+                        }
+                      ],
+                      "items": [
+                        {
+                          "niceName": "Consequence",
+                          "type": "Consequence",
+                          "commandModule": "resolume",
+                          "commandPath": "Launch / Stop",
+                          "commandType": "Launch Clip",
+                          "command": {
+                            "parameters": [
+                              {
+                                "value": "Clip",
+                                "controlAddress": "/level"
+                              },
+                              {
+                                "value": 7,
+                                "hexMode": false,
+                                "controlAddress": "/layer"
+                              },
+                              {
+                                "value": 7,
+                                "hexMode": false,
+                                "controlAddress": "/clip"
+                              }
+                            ],
+                            "paramLinks": {
+                            },
+                            "arguments": {
+                              "hideInEditor": true,
+                              "paramLinks": {
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "viewOffset": [
+                        0,
+                        0
+                      ],
+                      "viewZoom": 1.0
+                    }
+                  },
+                  {
+                    "parameters": [
+                      {
+                        "value": false,
+                        "controlAddress": "/enabled"
+                      },
+                      {
+                        "value": 561.7999877929688,
+                        "controlAddress": "/time"
+                      },
+                      {
+                        "value": 0.0,
+                        "controlAddress": "/flagY"
+                      }
+                    ],
+                    "niceName": "Start Interperf",
+                    "type": "TimeTrigger",
+                    "consequences": {
+                      "parameters": [
+                        {
+                          "value": false,
+                          "controlAddress": "/cancelDelaysOnTrigger"
+                        }
+                      ],
+                      "items": [
+                        {
+                          "niceName": "Consequence",
+                          "type": "Consequence",
+                          "commandModule": "sequences",
+                          "commandPath": "Playback",
+                          "commandType": "Play Sequence",
+                          "command": {
+                            "parameters": [
+                              {
+                                "value": "/sequences/interperf",
+                                "controlAddress": "/target"
+                              },
+                              {
+                                "value": true,
+                                "controlAddress": "/playFromStart"
+                              }
+                            ],
+                            "paramLinks": {
+                            }
+                          }
+                        }
+                      ],
+                      "viewOffset": [
+                        0,
+                        0
+                      ],
+                      "viewZoom": 1.0
+                    }
+                  },
+                  {
+                    "parameters": [
+                      {
+                        "value": false,
+                        "controlAddress": "/enabled"
+                      },
+                      {
+                        "value": 561.7999877929688,
+                        "controlAddress": "/time"
+                      },
+                      {
+                        "value": 0.0,
+                        "controlAddress": "/flagY"
+                      }
+                    ],
+                    "niceName": "Start Interperf 1",
+                    "type": "TimeTrigger",
+                    "consequences": {
+                      "parameters": [
+                        {
+                          "value": false,
+                          "controlAddress": "/cancelDelaysOnTrigger"
+                        }
+                      ],
+                      "items": [
+                        {
+                          "niceName": "Consequence",
+                          "type": "Consequence",
+                          "commandModule": "sequences",
+                          "commandPath": "Playback",
+                          "commandType": "Play Sequence",
+                          "command": {
+                            "parameters": [
+                              {
+                                "value": "/sequences/interperf",
+                                "controlAddress": "/target"
+                              },
+                              {
+                                "value": true,
+                                "controlAddress": "/playFromStart"
+                              }
+                            ],
+                            "paramLinks": {
+                            }
+                          }
+                        }
+                      ],
+                      "viewOffset": [
+                        0,
+                        0
+                      ],
+                      "viewZoom": 1.0
+                    }
+                  }
+                ],
+                "viewOffset": [
+                  0,
+                  0
+                ],
+                "viewZoom": 1.0
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "value": true,
+                  "controlAddress": "/enabled"
+                },
+                {
+                  "value": 80.0,
+                  "controlAddress": "/listSize"
+                },
+                {
+                  "value": 80,
+                  "hexMode": false,
+                  "controlAddress": "/uiHeight"
+                }
+              ],
+              "niceName": "Audio",
+              "type": "Audio",
+              "clips": {
+                "hideInEditor": true,
+                "items": [
+                  {
+                    "parameters": [
+                      {
+                        "value": 0.0,
+                        "controlAddress": "/startTime"
+                      },
+                      {
+                        "value": "D:/Gamgie/Projects/Ultreia/Nexus/Medias/SOUNDS/Nexus V11bisbis V2 avec voix version def def ++.wav",
+                        "controlAddress": "/filePath"
+                      }
+                    ],
+                    "niceName": "AudioClip",
+                    "editorIsCollapsed": true,
+                    "type": "AudioClip"
+                  }
+                ],
+                "viewOffset": [
+                  0,
+                  0
+                ],
+                "viewZoom": 1.0
+              },
+              "channels": {
+                "parameters": [
+                  {
+                    "value": true,
+                    "controlAddress": "/channel1Left"
+                  },
+                  {
+                    "value": true,
+                    "controlAddress": "/channel2Right"
+                  }
+                ]
+              },
+              "audioModule": "soundCard"
+            }
+          ],
+          "viewOffset": [
+            0,
+            0
+          ],
+          "viewZoom": 1.0
+        },
+        "cues": {
+          "hideInEditor": true,
+          "viewOffset": [
+            0,
+            0
+          ],
+          "viewZoom": 1.0
         },
         "editing": true
+      },
+      {
+        "parameters": [
+          {
+            "value": "",
+            "controlAddress": "/ltcSyncModule",
+            "enabled": false
+          }
+        ],
+        "niceName": "Interperf",
+        "type": "Sequence",
+        "layers": {
+          "hideInEditor": true,
+          "viewOffset": [
+            0,
+            0
+          ],
+          "viewZoom": 1.0
+        },
+        "cues": {
+          "hideInEditor": true,
+          "viewOffset": [
+            0,
+            0
+          ],
+          "viewZoom": 1.0
+        }
       }
     ],
     "viewOffset": [
