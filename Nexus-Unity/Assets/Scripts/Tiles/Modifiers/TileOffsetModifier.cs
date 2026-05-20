@@ -32,10 +32,10 @@ public class TileOffsetModifier : TileModifier
             if (repelDist > 0)
             {
                 repelDir /= repelDist;
-                target += repelDir * repel * weight;
+                target += tile.transform.TransformPoint(repelDir) * repel * weight;
             }
         }
 
-        tile.transform.position += target;
+        tile.transform.localPosition += target;
     }
 }

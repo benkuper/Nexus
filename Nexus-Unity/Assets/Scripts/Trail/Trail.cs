@@ -62,6 +62,7 @@ public class Trail : MonoBehaviour
     void Start()
     {
         trail = GetComponent<TrailRenderer>();
+        timeAtStart = Time.unscaledTime;
 
         if (tileController != null)
         {
@@ -81,7 +82,7 @@ public class Trail : MonoBehaviour
         if (tileController == null) return;
 
         // Calculate age
-        float age = Time.time - timeAtStart;
+        float age = Time.unscaledTime - timeAtStart;
 
         // Handle destruction based on life only
         if (age >= maxLife)
@@ -107,7 +108,7 @@ public class Trail : MonoBehaviour
         }
 
         // Step timer for live path calculation
-        stepTimer += (speed - uniqueRandomness * speedRandomness) * Time.deltaTime;
+        stepTimer += (speed - uniqueRandomness * speedRandomness) * Time.unscaledDeltaTime;
 
         // Take a step when timer reaches 1 (1 step per second at speed=1)
         if (stepTimer >= 1f)
@@ -124,6 +125,7 @@ public class Trail : MonoBehaviour
     {
         stepTimer = 0f;
         pathEnded = false;
+        timeAtStart = Time.unscaledTime;
         InitializePathState();
 
         // Clear trail renderer
@@ -138,7 +140,7 @@ public class Trail : MonoBehaviour
         this.startY = startY;
         this.offset = offset;
         uniqueRandomness = Random.value;
-        timeAtStart = Time.time;
+        timeAtStart = Time.unscaledTime;
         InitializePathState();
     }
 

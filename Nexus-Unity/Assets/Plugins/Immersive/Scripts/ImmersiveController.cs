@@ -43,6 +43,7 @@ public sealed class ImmersiveController : MonoBehaviour
         public Material runtimeMaterial;
         public Camera camera;
         public RenderTexture renderTexture;
+        public bool ownsRenderTexture;
         public readonly Vector3[] cornersWorld = new Vector3[4];
     }
 
@@ -84,6 +85,14 @@ public sealed class ImmersiveController : MonoBehaviour
     [Header("Outputs")]
     [SerializeField] private bool enableSpoutSender = true;
     [SerializeField] private bool enableNdiSender = true;
+
+    [Header("Render Textures")]
+    [SerializeField] public RenderTexture leftRT;
+    [SerializeField] public RenderTexture rightRT;
+    [SerializeField] public RenderTexture frontRT;
+    [SerializeField] public RenderTexture backRT;
+    [SerializeField] public RenderTexture floorRT;
+    [SerializeField] public RenderTexture ceilingRT;
 
     private readonly Dictionary<SurfaceId, SurfaceRig> _rigs = new Dictionary<SurfaceId, SurfaceRig>(6);
     private Transform _camerasContainer;
@@ -523,8 +532,42 @@ public sealed class ImmersiveController : MonoBehaviour
 
     private void UpdateRenderTexture(SurfaceRig rig)
     {
+        var assignedRenderTexture = GetAssignedRenderTexture(rig.id);
+
+        if (assignedRenderTexture != null)
+        {
+            if (rig.renderTexture != assignedRenderTexture)
+            {
+                if (rig.camera != null && rig.camera.targetTexture == rig.renderTexture)
+                {
+                    rig.camera.targetTexture = null;
+                }
+
+                if (rig.ownsRenderTexture && rig.renderTexture != null)
+                {
+                    SafeDestroy(rig.renderTexture);
+                }
+
+                rig.renderTexture = assignedRenderTexture;
+                rig.ownsRenderTexture = false;
+            }
+
+            rig.camera.targetTexture = rig.renderTexture;
+            return;
+        }
+
         GetSurfaceData(rig.id, out _, out _, out _, out var wallWidth, out var wallHeight);
         var size = ComputeRenderTextureSize(wallWidth, wallHeight) / resolutionDivider;
+
+        if (!rig.ownsRenderTexture && rig.renderTexture != null)
+        {
+            if (rig.camera != null && rig.camera.targetTexture == rig.renderTexture)
+            {
+                rig.camera.targetTexture = null;
+            }
+
+            rig.renderTexture = null;
+        }
 
         if (rig.renderTexture != null && (rig.renderTexture.width != size.x || rig.renderTexture.height != size.y))
         {
@@ -552,10 +595,36 @@ public sealed class ImmersiveController : MonoBehaviour
                 useMipMap = false
             };
             rig.renderTexture.Create();
+            rig.ownsRenderTexture = true;
         }
 
-        rig.renderTexture.name = rig.id.ToString();
+        if (rig.ownsRenderTexture)
+        {
+            rig.renderTexture.name = rig.id.ToString();
+        }
+
         rig.camera.targetTexture = rig.renderTexture;
+    }
+
+    private RenderTexture GetAssignedRenderTexture(SurfaceId id)
+    {
+        switch (id)
+        {
+            case SurfaceId.Left:
+                return leftRT;
+            case SurfaceId.Right:
+                return rightRT;
+            case SurfaceId.Front:
+                return frontRT;
+            case SurfaceId.Back:
+                return backRT;
+            case SurfaceId.Floor:
+                return floorRT;
+            case SurfaceId.Ceiling:
+                return ceilingRT;
+            default:
+                return null;
+        }
     }
 
     private Vector2Int ComputeRenderTextureSize(float wallWidth, float wallHeight)
@@ -589,7 +658,8 @@ public sealed class ImmersiveController : MonoBehaviour
     private float GetPixelsPerMeter()
     {
         var referenceSizeMeters = GetReferenceDimensionMeters();
-        return desiredResolutionValue / Mathf.Max(0.01f, referenceSizeMeters);
+        var pixelsPerMeter = desiredResolutionValue / Mathf.Max(0.01f, referenceSizeMeters);
+        return pixelsPerMeter;
     }
 
     private void NormalizeResolutionInputs()
@@ -939,7 +1009,10 @@ public sealed class ImmersiveController : MonoBehaviour
                 rig.camera.targetTexture = null;
             }
 
-            SafeDestroy(rig.renderTexture);
+            if (rig.ownsRenderTexture)
+            {
+                SafeDestroy(rig.renderTexture);
+            }
         }
 
         if (rig.wall != null)

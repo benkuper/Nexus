@@ -61,14 +61,14 @@ public class TrailController : MonoBehaviour
 
         if (continuousSpawn)
         {
-            if (Time.time - timeAtLastSpawn >= 1.0f / spawnRate)
+            if (Time.unscaledTime - timeAtLastSpawn >= 1.0f / spawnRate)
             {
                 for (int i = 0; i < trailsPerSpawn; i++)
                 {
                     SpawnTrail(continuousSpawnIndex);
                 }
 
-                timeAtLastSpawn = Time.time;
+                timeAtLastSpawn = Time.unscaledTime;
             }
         }
 
