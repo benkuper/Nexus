@@ -59,7 +59,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: cdac6a8a029f6d74f96efb659f75d209, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -132,7 +132,7 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.9277679, g: 0.94287413, b: 0.9622642, a: 1}
-      key1: {r: 0.057223175, g: 0.45085666, b: 0.645283, a: 1}
+      key1: {r: 0.47144887, g: 0.67287296, b: 0.7735849, a: 1}
       key2: {r: 0.5224421, g: 0.8168777, b: 0.9924528, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -188,8 +188,10 @@ MonoBehaviour:
   speed: 0.1
   speedRandomness: 0
   turnProbability: 0.498
-  maxSteps: 50
+  escapeProbability: 0
+  escapeDirections: 
+  maxLife: 1
+  uniqueRandomness: 0
   reset: 0
-  progression: 0
   trailLength: 5
   trailWidth: 1

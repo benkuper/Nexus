@@ -62,7 +62,7 @@ public class Trail : MonoBehaviour
     void Start()
     {
         trail = GetComponent<TrailRenderer>();
-        timeAtStart = Time.unscaledTime;
+        timeAtStart = Time.time;
 
         if (tileController != null)
         {
@@ -82,7 +82,7 @@ public class Trail : MonoBehaviour
         if (tileController == null) return;
 
         // Calculate age
-        float age = Time.unscaledTime - timeAtStart;
+        float age = Time.time - timeAtStart;
 
         // Handle destruction based on life only
         if (age >= maxLife)
@@ -95,7 +95,7 @@ public class Trail : MonoBehaviour
         }
 
         // Update trail appearance based on life
-        float lifeMap = Mathf.Clamp01(((age / maxLife) - .8f) / .2f);
+        float lifeMap = Mathf.Clamp01(((age / maxLife) - .4f) / .6f);
         if (trail == null) trail = GetComponent<TrailRenderer>();
         trail.time = trailLength * (1 - lifeMap);
         trail.widthMultiplier = trailWidth;
@@ -125,7 +125,7 @@ public class Trail : MonoBehaviour
     {
         stepTimer = 0f;
         pathEnded = false;
-        timeAtStart = Time.unscaledTime;
+        timeAtStart = Time.time;
         InitializePathState();
 
         // Clear trail renderer
@@ -140,7 +140,7 @@ public class Trail : MonoBehaviour
         this.startY = startY;
         this.offset = offset;
         uniqueRandomness = Random.value;
-        timeAtStart = Time.unscaledTime;
+        timeAtStart = Time.time;
         InitializePathState();
     }
 

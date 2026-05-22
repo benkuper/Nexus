@@ -8,4 +8,5 @@ public class Tile : MonoBehaviour
 
     public float relativeX;
     public float relativeY;
+
 }

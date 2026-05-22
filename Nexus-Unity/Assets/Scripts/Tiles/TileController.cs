@@ -454,6 +454,6 @@ public class TileController : MonoBehaviour
 
     public bool IsValidTile(int targetX, int targetY)
     {
-        return targetX >= 0 && targetX < horizontalCount && targetY >= 0 && targetY < verticalCount;
+        return targetX >= 0 && targetX <= horizontalCount && targetY >= 0 && targetY <= verticalCount;
     }
 }

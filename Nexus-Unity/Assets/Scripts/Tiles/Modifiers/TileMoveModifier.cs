@@ -7,35 +7,51 @@ public class TileMoveModifier : TileModifier
     public Vector3 motionAmplitude;
     public float motionFrequency = 1f;
     [Range(0f, 1f)] public float motionTileRandomness = 0.5f;
+    public float motionTileRandomScale = 0.5f;
 
     [Header("Rotation Settings")]
     public Vector3 rotationAmplitude;
     public float rotationFrequency = 1f;
     [Range(0f, 1f)] public float rotationTileRandomness = 0.5f;
+    public float rotationTileRandomScale = 0.5f;
 
     public override void updateTile(Tile tile, float weight)
     {
+        Vector3 motionNoise = SampleNoiseVector3(tile, motionFrequency, motionTileRandomScale, motionTileRandomness, 0f);
+        Vector3 motionOffset = Vector3.Scale(motionNoise, motionAmplitude) * weight;
+        tile.transform.localPosition += motionOffset;
 
-        // Controls how different tiles are from each other (1 = max variation between tiles)
-        float motionTileAmount = Mathf.PerlinNoise(tile.x * motionTileRandomness, tile.y * motionTileRandomness);
-        float rotTileAmount = Mathf.PerlinNoise(tile.x * rotationTileRandomness, tile.y * rotationTileRandomness);
+        Vector3 rotationNoise = SampleNoiseVector3(tile, rotationFrequency, rotationTileRandomScale, rotationTileRandomness, 100f);
+        Vector3 rotationOffset = Vector3.Scale(rotationNoise, rotationAmplitude) * weight;
+        tile.transform.localRotation *= Quaternion.Euler(rotationOffset);
+    }
 
-        float mt = Time.time * motionFrequency + tile.x * motionTileRandomness * tile.y;
-        float rt = Time.time * rotationFrequency + tile.x * rotationTileRandomness * tile.y;
+    private static Vector3 SampleNoiseVector3(Tile tile, float frequency, float scale, float randomness, float seed)
+    {
+        float time = Time.unscaledTime * frequency;
+        float x = tile.x * scale * randomness;
+        float y = tile.y * scale * randomness;
 
-        Vector3 motion = new Vector3(
-            (Mathf.PerlinNoise(mt + motionTileRandomness, 0f) * 2f - 1f) * motionAmplitude.x,
-            (Mathf.PerlinNoise(mt + motionTileRandomness, 1f) * 2f - 1f) * motionAmplitude.y,
-            (Mathf.PerlinNoise(mt + motionTileRandomness, 2f) * 2f - 1f) * motionAmplitude.z
+        return new Vector3(
+            SampleSignedNoise3D(x + 11.31f + seed, y + 17.29f, time + 23.73f),
+            SampleSignedNoise3D(x + 31.97f + seed, y + 47.11f, time + 53.59f),
+            SampleSignedNoise3D(x + 61.43f + seed, y + 71.83f, time + 83.67f)
         );
+    }
 
-        Vector3 rotation = new Vector3(
-            (Mathf.PerlinNoise(rt + rotationTileRandomness + 10f, 0f) * 2f - 1f) * rotationAmplitude.x,
-            (Mathf.PerlinNoise(rt + rotationTileRandomness + 10f, 1f) * 2f - 1f) * rotationAmplitude.y,
-            (Mathf.PerlinNoise(rt + rotationTileRandomness + 10f, 2f) * 2f - 1f) * rotationAmplitude.z
-        );
+    private static float SampleSignedNoise3D(float x, float y, float z)
+    {
+        return SampleNoise3D(x, y, z) * 2f - 1f;
+    }
 
-        tile.transform.localPosition += motion * motionTileAmount * weight;
-        tile.transform.localRotation *= Quaternion.Euler(rotation * rotTileAmount * weight);
+    private static float SampleNoise3D(float x, float y, float z)
+    {
+        float xy = Mathf.PerlinNoise(x, y);
+        float yz = Mathf.PerlinNoise(y, z);
+        float xz = Mathf.PerlinNoise(x, z);
+        float yx = Mathf.PerlinNoise(y, x);
+        float zy = Mathf.PerlinNoise(z, y);
+        float zx = Mathf.PerlinNoise(z, x);
+        return (xy + yz + xz + yx + zy + zx) / 6f;
     }
 }
