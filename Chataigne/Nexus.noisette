@@ -3458,11 +3458,11 @@
             "controlAddress": "/totalTime"
           },
           {
-            "value": 380.6603393554688,
+            "value": 0.0,
             "controlAddress": "/viewStartTime"
           },
           {
-            "value": 447.0762939453125,
+            "value": 593.0,
             "controlAddress": "/viewEndTime"
           },
           {
@@ -4693,17 +4693,20 @@
             0
           ],
           "viewZoom": 1.0
-        },
-        "editing": true
+        }
       },
       {
         "parameters": [
           {
-            "value": 300.0,
+            "value": 307.0,
             "controlAddress": "/totalTime"
           },
           {
-            "value": 300.0,
+            "value": 0.0,
+            "controlAddress": "/viewStartTime"
+          },
+          {
+            "value": 307.0,
             "controlAddress": "/viewEndTime"
           },
           {
@@ -4795,6 +4798,27 @@
                           }
                         }
                       ],
+                      "viewOffset": [
+                        0,
+                        0
+                      ],
+                      "viewZoom": 1.0
+                    }
+                  },
+                  {
+                    "parameters": [
+                      {
+                        "value": 247.0,
+                        "controlAddress": "/time"
+                      },
+                      {
+                        "value": 0.4416666626930237,
+                        "controlAddress": "/flagY"
+                      }
+                    ],
+                    "niceName": "Start Countdown",
+                    "type": "TimeTrigger",
+                    "consequences": {
                       "viewOffset": [
                         0,
                         0
@@ -4897,7 +4921,8 @@
             0
           ],
           "viewZoom": 1.0
-        }
+        },
+        "editing": true
       }
     ],
     "viewOffset": [
