@@ -482,7 +482,7 @@
                       "controlAddress": "/Sensorsoffset"
                     },
                     {
-                      "value": 0.0,
+                      "value": 0.321,
                       "controlMode": 2,
                       "reference": {
                         "value": "/customVariables/slime/variables/agentsizemult/agentsizemult",
@@ -1744,7 +1744,7 @@
             {
               "parameters": [
                 {
-                  "value": 0.0,
+                  "value": 0.321,
                   "minValue": 0.0,
                   "maxValue": 1.0,
                   "default": 0.136000007390976,
@@ -3310,7 +3310,6 @@
                 }
               ],
               "niceName": "ENd",
-              "editorIsCollapsed": true,
               "type": "MorphTarget",
               "values": {
                 "containers": {
@@ -3826,7 +3825,6 @@
                 }
               ],
               "niceName": "LastPreset",
-              "editorIsCollapsed": true,
               "type": "MorphTarget",
               "values": {
                 "containers": {
@@ -3934,255 +3932,6 @@
                     "parameters": [
                       {
                         "value": 0.321,
-                        "controlAddress": "/agentsizemult"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Agentsizemult"
-                  },
-                  "hueoffset": {
-                    "parameters": [
-                      {
-                        "value": 4.651153564453125,
-                        "controlAddress": "/hueoffset"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Hueoffset"
-                  },
-                  "saturationmult": {
-                    "parameters": [
-                      {
-                        "value": 1.337906956672668,
-                        "controlAddress": "/saturationmult"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Saturationmult"
-                  },
-                  "altinfluence1": {
-                    "parameters": [
-                      {
-                        "value": 0.0,
-                        "controlAddress": "/altinfluence1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Altinfluence1"
-                  },
-                  "alttrailinfluence1": {
-                    "parameters": [
-                      {
-                        "value": 0.0,
-                        "controlAddress": "/alttrailinfluence1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Alttrailinfluence1"
-                  },
-                  "stepsize1": {
-                    "parameters": [
-                      {
-                        "value": 0.4294159412384033,
-                        "controlAddress": "/stepsize1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Stepsize1"
-                  },
-                  "sasensorsangle1": {
-                    "parameters": [
-                      {
-                        "value": 0.4082389771938324,
-                        "controlAddress": "/sasensorsangle1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Sasensorsangle1"
-                  },
-                  "rarotateangle1": {
-                    "parameters": [
-                      {
-                        "value": 0.4476636946201324,
-                        "controlAddress": "/rarotateangle1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Rarotateangle1"
-                  },
-                  "sensorsoffset1": {
-                    "parameters": [
-                      {
-                        "value": 11.01628017425537,
-                        "controlAddress": "/sensorsoffset1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Sensorsoffset1"
-                  },
-                  "agentsizemult1": {
-                    "parameters": [
-                      {
-                        "value": 0.235,
-                        "controlAddress": "/agentsizemult1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Agentsizemult1"
-                  },
-                  "hueoffset1": {
-                    "parameters": [
-                      {
-                        "value": 237.0,
-                        "controlAddress": "/hueoffset1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Hueoffset1"
-                  },
-                  "saturationmult1": {
-                    "parameters": [
-                      {
-                        "value": 3.0,
-                        "controlAddress": "/saturationmult1"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Saturationmult1"
-                  },
-                  "radius": {
-                    "parameters": [
-                      {
-                        "value": 0.89,
-                        "controlAddress": "/radius"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Radius"
-                  }
-                }
-              }
-            },
-            {
-              "parameters": [
-                {
-                  "value": [
-                    1.0,
-                    0.0,
-                    0.6530461311340332,
-                    1.0
-                  ],
-                  "controlAddress": "/color"
-                }
-              ],
-              "niceName": "VeryLastPreset",
-              "type": "MorphTarget",
-              "values": {
-                "containers": {
-                  "initradius": {
-                    "parameters": [
-                      {
-                        "value": 0.053,
-                        "controlAddress": "/initradius"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Initradius"
-                  },
-                  "agentssizepx": {
-                    "parameters": [
-                      {
-                        "value": 2.754567623138428,
-                        "controlAddress": "/agentssizepx"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Agentssizepx"
-                  },
-                  "agentsopacity": {
-                    "parameters": [
-                      {
-                        "value": 0.7801111340522766,
-                        "controlAddress": "/agentsopacity"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Agentsopacity"
-                  },
-                  "evaporation": {
-                    "parameters": [
-                      {
-                        "value": 0.878000020980835,
-                        "controlAddress": "/evaporation"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Evaporation"
-                  },
-                  "influenceMapIndex": {
-                    "parameters": [
-                      {
-                        "value": 4.0,
-                        "controlAddress": "/influenceMapIndex"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Influence Map Index"
-                  },
-                  "trailmapinfluence": {
-                    "parameters": [
-                      {
-                        "value": 0.8045268058776855,
-                        "controlAddress": "/trailmapinfluence"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Trailmapinfluence"
-                  },
-                  "stepsize": {
-                    "parameters": [
-                      {
-                        "value": 0.5566321015357971,
-                        "controlAddress": "/stepsize"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Stepsize"
-                  },
-                  "sasensorsangle": {
-                    "parameters": [
-                      {
-                        "value": 2.933251142501831,
-                        "controlAddress": "/sasensorsangle"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Sasensorsangle"
-                  },
-                  "rarotateangle": {
-                    "parameters": [
-                      {
-                        "value": 0.1069881767034531,
-                        "controlAddress": "/rarotateangle"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Rarotateangle"
-                  },
-                  "sensorsoffset": {
-                    "parameters": [
-                      {
-                        "value": 21.70662879943848,
-                        "controlAddress": "/sensorsoffset"
-                      }
-                    ],
-                    "owned": true,
-                    "niceName": "Sensorsoffset"
-                  },
-                  "agentsizemult": {
-                    "parameters": [
-                      {
-                        "value": 0.0,
                         "controlAddress": "/agentsizemult"
                       }
                     ],
@@ -7896,7 +7645,7 @@
                   {
                     "parameters": [
                       {
-                        "value": 66.92000579833984,
+                        "value": 65.46000671386719,
                         "controlAddress": "/time"
                       },
                       {
@@ -7923,7 +7672,7 @@
                           "command": {
                             "parameters": [
                               {
-                                "value": "/slime/presets/veryLastPreset",
+                                "value": "/slime/presets/lastPreset",
                                 "controlAddress": "/targetPreset"
                               },
                               {
@@ -8207,7 +7956,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 75.30000305175781,
+                      "value": 63.20000076293945,
                       "controlAddress": "/position"
                     },
                     {
@@ -8712,7 +8461,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 75.30000305175781,
+                      "value": 63.20000076293945,
                       "controlAddress": "/position"
                     },
                     {
@@ -9293,7 +9042,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 75.30000305175781,
+                      "value": 63.20000076293945,
                       "controlAddress": "/position"
                     },
                     {
@@ -9585,7 +9334,7 @@
                       "controlAddress": "/length"
                     },
                     {
-                      "value": 75.30000305175781,
+                      "value": 63.20000076293945,
                       "controlAddress": "/position"
                     },
                     {
