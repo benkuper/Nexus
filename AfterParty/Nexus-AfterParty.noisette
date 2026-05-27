@@ -78,19 +78,19 @@
             {
               "type": 1,
               "width": 1920,
-              "height": 582,
+              "height": 664,
               "direction": 1,
               "shifters": [
                 {
                   "type": 1,
                   "width": 307,
-                  "height": 582,
+                  "height": 664,
                   "direction": 2,
                   "shifters": [
                     {
                       "type": 0,
                       "width": 307,
-                      "height": 289,
+                      "height": 330,
                       "currentContent": "Modules",
                       "tabs": [
                         {
@@ -101,7 +101,7 @@
                     {
                       "type": 0,
                       "width": 307,
-                      "height": 286,
+                      "height": 327,
                       "currentContent": "Custom Variables",
                       "tabs": [
                         {
@@ -114,7 +114,7 @@
                 {
                   "type": 0,
                   "width": 728,
-                  "height": 582,
+                  "height": 664,
                   "currentContent": "State Machine",
                   "tabs": [
                     {
@@ -134,7 +134,7 @@
                 {
                   "type": 0,
                   "width": 873,
-                  "height": 582,
+                  "height": 664,
                   "currentContent": "Inspector",
                   "tabs": [
                     {
@@ -147,13 +147,13 @@
             {
               "type": 1,
               "width": 1920,
-              "height": 401,
+              "height": 319,
               "direction": 1,
               "shifters": [
                 {
                   "type": 0,
                   "width": 178,
-                  "height": 401,
+                  "height": 319,
                   "currentContent": "Sequences",
                   "tabs": [
                     {
@@ -164,7 +164,7 @@
                 {
                   "type": 0,
                   "width": 1256,
-                  "height": 401,
+                  "height": 319,
                   "currentContent": "Sequence Editor",
                   "tabs": [
                     {
@@ -175,7 +175,7 @@
                 {
                   "type": 0,
                   "width": 474,
-                  "height": 401,
+                  "height": 319,
                   "currentContent": "Logger",
                   "tabs": [
                     {
@@ -6590,6 +6590,12 @@
         "hasListenExtension": true
       },
       {
+        "parameters": [
+          {
+            "value": false,
+            "controlAddress": "/logOutgoing"
+          }
+        ],
         "niceName": "TD",
         "type": "OSCQuery",
         "scripts": {
@@ -6601,6 +6607,10 @@
         },
         "params": {
           "parameters": [
+            {
+              "value": true,
+              "controlAddress": "/keepValuesOnSync"
+            },
             {
               "value": "TD OSC Query Server",
               "controlAddress": "/serverName"
@@ -6663,6 +6673,12 @@
               "editorIsCollapsed": true,
               "containers": {
                 "Custom": {
+                  "parameters": [
+                    {
+                      "value": 9.753161430358887,
+                      "controlAddress": "/Maskevolution"
+                    }
+                  ],
                   "editorIsCollapsed": true,
                   "owned": true,
                   "niceName": "Custom"
@@ -6748,7 +6764,7 @@
                 "Custom": {
                   "parameters": [
                     {
-                      "value": 0.0,
+                      "value": 0.15,
                       "controlAddress": "/Size"
                     }
                   ],
@@ -6766,7 +6782,7 @@
                 "Custom": {
                   "parameters": [
                     {
-                      "value": 0.0,
+                      "value": 0.15,
                       "controlAddress": "/Size"
                     }
                   ],
@@ -7554,7 +7570,7 @@
               "shortName": "_prop_3_buttons_button1_multiPress"
             },
             {
-              "value": 0,
+              "value": 1,
               "hexMode": false,
               "controlAddress": "/_prop_3_buttons_button1_pressed",
               "type": "Integer",
@@ -7600,7 +7616,7 @@
               "shortName": "_prop_4_buttons_button1_longPress"
             },
             {
-              "value": 3,
+              "value": 0,
               "hexMode": false,
               "controlAddress": "/_prop_4_buttons_button1_multiPress",
               "type": "Integer",
@@ -7613,7 +7629,7 @@
               "shortName": "_prop_4_buttons_button1_multiPress"
             },
             {
-              "value": 0,
+              "value": 1,
               "hexMode": false,
               "controlAddress": "/_prop_4_buttons_button1_pressed",
               "type": "Integer",
@@ -7777,7 +7793,7 @@
                   "controlAddress": "/count"
                 },
                 {
-                  "value": 2,
+                  "value": 5,
                   "hexMode": false,
                   "controlAddress": "/previewIndex"
                 }
@@ -8030,15 +8046,15 @@
                             "command": {
                               "parameters": [
                                 {
-                                  "value": "",
-                                  "controlAddress": "/target"
-                                },
-                                {
                                   "value": 1.0,
                                   "controlAddress": "/time"
                                 }
                               ],
                               "paramLinks": {
+                                "target": {
+                                  "linkType": 2,
+                                  "list": "audioLayersA"
+                                }
                               }
                             }
                           },
@@ -8051,15 +8067,15 @@
                             "command": {
                               "parameters": [
                                 {
-                                  "value": "",
-                                  "controlAddress": "/target"
-                                },
-                                {
                                   "value": 1.0,
                                   "controlAddress": "/time"
                                 }
                               ],
                               "paramLinks": {
+                                "target": {
+                                  "linkType": 2,
+                                  "list": "audioLayersB"
+                                }
                               }
                             }
                           }
@@ -8087,10 +8103,6 @@
                             "command": {
                               "parameters": [
                                 {
-                                  "value": "",
-                                  "controlAddress": "/target"
-                                },
-                                {
                                   "value": 1.0,
                                   "controlAddress": "/time"
                                 },
@@ -8100,6 +8112,10 @@
                                 }
                               ],
                               "paramLinks": {
+                                "target": {
+                                  "linkType": 2,
+                                  "list": "audioLayersA"
+                                }
                               }
                             }
                           },
@@ -8112,10 +8128,6 @@
                             "command": {
                               "parameters": [
                                 {
-                                  "value": "",
-                                  "controlAddress": "/target"
-                                },
-                                {
                                   "value": 1.0,
                                   "controlAddress": "/time"
                                 },
@@ -8125,6 +8137,10 @@
                                 }
                               ],
                               "paramLinks": {
+                                "target": {
+                                  "linkType": 2,
+                                  "list": "audioLayersB"
+                                }
                               }
                             }
                           }
@@ -8983,7 +8999,7 @@
                   "controlAddress": "/uiHeight"
                 },
                 {
-                  "value": 0.0,
+                  "value": 1.0,
                   "controlAddress": "/volume"
                 },
                 {
@@ -9014,6 +9030,7 @@
                       }
                     ],
                     "niceName": "AudioClip",
+                    "editorIsCollapsed": true,
                     "type": "AudioClip"
                   }
                 ],
@@ -9053,7 +9070,7 @@
                   "controlAddress": "/uiHeight"
                 },
                 {
-                  "value": 0.0,
+                  "value": 1.0,
                   "controlAddress": "/volume"
                 }
               ],
@@ -9118,7 +9135,7 @@
                   "controlAddress": "/uiHeight"
                 },
                 {
-                  "value": 0.0,
+                  "value": 1.0,
                   "controlAddress": "/volume"
                 },
                 {
@@ -9189,7 +9206,7 @@
                   "controlAddress": "/uiHeight"
                 },
                 {
-                  "value": 0.0,
+                  "value": 1.0,
                   "controlAddress": "/volume"
                 }
               ],
